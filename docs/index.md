@@ -1,5 +1,5 @@
 <!-- markdownlint-disable first-line-h1 no-inline-html -->
-<img src="../Resources/vcda-icon.png" alt="VMmware Cloud Director Availability" width="150"></br></br>
+<img src="assets/images/vcda-icon.png" alt="VMmware Cloud Director Availability" width="150">
 
 # Powershell Module for VMware Cloud Director Availability on Azure VMware Solution.
 
