@@ -3,7 +3,7 @@ Copyright 2023 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 #>
 function Uninstall-VCDAAVS {
-<#
+    <#
 .SYNOPSIS
     Delete all VCDA VMs, any custome roles, folders and accounts used by VCDA.
 .DESCRIPTION
@@ -14,7 +14,7 @@ function Uninstall-VCDAAVS {
     Will Delete all VCDA VMs, any custome roles, folders and accounts used by VCDA.
 #>
 
-
+    [AVSAttribute(30, UpdatesSDDC = $false)]
     [CmdletBinding()]
 
     param (
@@ -24,6 +24,10 @@ function Uninstall-VCDAAVS {
         [switch]$AcceptUninstall
     )
     Try {
+        #make sure vc connection is healthy, script will fail if not
+        if ($null -eq ((Get-View SessionManager -Server $global:DefaultVIServer).CurrentSession)) {
+            Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
+        }
         if ($AcceptUninstall -ne $true) {
             Write-Error 'You must accept that All VCDA virtual machines, any custome roles, folders and accounts used by VCDA will be deleted.'
         }
@@ -36,25 +40,25 @@ function Uninstall-VCDAAVS {
         elseif ($VCDA_VMs) {
             #check if all VMs are in powered off state
             $power_on_count = 0
-            $VCDA_VMs | Where-Object {$_.PowerState -ne "PoweredOff"} | ForEach-Object {
+            $VCDA_VMs | Where-Object { $_.PowerState -ne "PoweredOff" } | ForEach-Object {
                 Write-Log -message "VM '$($_.name)' is in '$($_.PowerState)' State."
-                $power_on_count +=1
+                $power_on_count += 1
             }
-            if ($power_on_count -ne 0){
+            if ($power_on_count -ne 0) {
                 Write-Error "Found $power_on_count VCDA VMs not in powered off state. Power off all VMs and try again."
             }
             elseif ($power_on_count -eq 0) {
-                foreach ($vm in $VCDA_VMs){
+                foreach ($vm in $VCDA_VMs) {
                     Write-Log -message "Deleting VM '$($vm.name)'"
                     Remove-VM -VM $vm -DeletePermanently -Confirm:$false
                 }
             }
         }
         #proceed with clean up if all VMs are removed successfully
-        if ($null -eq (Get-VCDAVM)){
+        if ($null -eq (Get-VCDAVM)) {
             #remove sso uer
             $sso_user = Get-SsoPersonUser -Name $Script:vcda_avs_params.vsphere.sa_username -Domain $SSO_domain
-            if ($null -ne $sso_user){
+            if ($null -ne $sso_user) {
                 Write-Log -message "Removing VCDA service account user '$($Script:vcda_avs_params.vsphere.sa_username)'"
                 Remove-SsoPersonUser -User $sso_user
             }
@@ -63,7 +67,7 @@ function Uninstall-VCDAAVS {
             }
             #remove vc role
             $role = Get-VIRole -Name $Script:vcda_avs_params.vsphere.vsphere_role -ErrorAction SilentlyContinue
-            if ($null -ne $role){
+            if ($null -ne $role) {
                 Write-Log -message "Removing vCenter Role '$($Script:vcda_avs_params.vsphere.vsphere_role)'"
                 Remove-VIRole -Role $role -Confirm:$false -Force
             }
@@ -86,7 +90,3 @@ function Uninstall-VCDAAVS {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 }
-
-
-
-

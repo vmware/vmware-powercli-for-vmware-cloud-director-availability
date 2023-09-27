@@ -73,7 +73,8 @@ SPDX-License-Identifier: BSD-2-Clause
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport    = 'Install-VCDAAVS', 'Uninstall-VCDAAVS', 'Stop-VCDAVM', 'Start-VCDAVM', 'Install-VCDAAVS', 'Install-VCDAReplicator'
+    FunctionsToExport    = 'Install-VCDAAVS', 'Uninstall-VCDAAVS', 'Stop-VCDAVM', 'Start-VCDAVM', 'Install-VCDAAVS', 'Install-VCDAReplicator',
+    'Reset-VCDARootPassword'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = @()
@@ -105,7 +106,7 @@ SPDX-License-Identifier: BSD-2-Clause
             # LicenseUri = ''
 
             # A URL to the main website for this project.
-            # ProjectUri = ''
+            ProjectUri = 'https://www.vmware.com/products/cloud-director-availability.html'
 
             # A URL to an icon representing this module.
             # IconUri = ''

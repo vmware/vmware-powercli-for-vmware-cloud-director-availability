@@ -103,7 +103,6 @@ function Invoke-VCDARequest {
                 $module = $ExecutionContext.SessionState.Module
                 $script:user_agent = (("Powershell", $PSVersionTable.PSVersion.ToString() -join "/"), ($module.Name.ToString(), $module.Version.ToString() -join "/") -join " " )
             }
-            Write-Debug $script:user_agent
             $LocalvarInvokeParams = @{
                 'uri'                  = $Requesturi.Uri
                 'headers'              = $RequestHeaders
@@ -112,7 +111,6 @@ function Invoke-VCDARequest {
                 'SkipCertificateCheck' = $SkipCertificateCheck
                 'UserAgent'            = $script:user_agent
             }
-            Write-debug "$($LocalvarInvokeParams.method) $($LocalvarInvokeParams.uri)"
             $LocalVarResult = Invoke-WebRequest @LocalvarInvokeParams
             if ($LocalVarResult.Headers.'Content-Type' -match "(?i)^(application/json|[^;/ \t]+/[^;/ \t]+[+]json)[ \t]*(;.*)?$") {
                 $LocalVarResponse = ConvertFrom-Json $LocalVarResult
@@ -166,7 +164,6 @@ function Invoke-VCDARequest {
             }
             #return server message wichc might have more meaningful information.
             elseif ($_.Exception.Response -and $null -ne $_.ErrorDetails.Message) {
-                Write-Debug "$_"
                 Write-Error "$(($_ | ConvertFrom-Json).msg)" -TargetObject "VCDA_Server_Error"
 
             }

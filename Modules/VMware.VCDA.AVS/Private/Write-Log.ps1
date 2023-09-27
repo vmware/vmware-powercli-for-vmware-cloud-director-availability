@@ -8,5 +8,5 @@ function Write-Log {
     [string]
     $message
     )
-    Write-Host "$(get-date -format "dd-MM-yyyy-HH:mm:ss"): $message"
+    Write-Host "$(get-date -format "dd-MM-yyyy-HH:mm:ss K"): $message"
 }

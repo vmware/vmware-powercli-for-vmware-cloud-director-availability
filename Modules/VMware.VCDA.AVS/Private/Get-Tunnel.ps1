@@ -3,7 +3,7 @@ Copyright 2023 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
 #>
 function Get-Tunnel {
-    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
+    [CmdletBinding()]
     param (
         # VCDA Server
         [Parameter(Mandatory = $false)]
