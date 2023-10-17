@@ -5,13 +5,13 @@ SPDX-License-Identifier: BSD-2-Clause
 function Uninstall-VCDAAVS {
     <#
 .SYNOPSIS
-    Delete all VCDA VMs, any custome roles, folders and accounts used by VCDA.
+    Delete all VCDA VMs, any custom roles, folders and accounts used by VCDA.
 .DESCRIPTION
-    Delete all VCDA VMs, any custome roles, folders and accounts used by VCDA.
+    Delete all VCDA VMs, any custom roles, folders and accounts used by VCDA.
     All VMs must be in Powered Off state.
 .EXAMPLE
     Uninstall-VCDAAVS -AcceptUninstall
-    Will Delete all VCDA VMs, any custome roles, folders and accounts used by VCDA.
+    Will Delete all VCDA VMs, any custom roles, folders and accounts used by VCDA.
 #>
 
     [AVSAttribute(30, UpdatesSDDC = $false)]
@@ -20,7 +20,7 @@ function Uninstall-VCDAAVS {
     param (
         [Parameter(
             Mandatory = $false,
-            HelpMessage = 'Accept that All VCDA virtual machines, any custome roles, folders and accounts used by VCDA. will be deleted.')]
+            HelpMessage = 'Accept that All VCDA virtual machines, any custom roles, folders and accounts used by VCDA. will be deleted.')]
         [switch]$AcceptUninstall
     )
     Try {
@@ -29,7 +29,7 @@ function Uninstall-VCDAAVS {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         if ($AcceptUninstall -ne $true) {
-            Write-Error 'You must accept that All VCDA virtual machines, any custome roles, folders and accounts used by VCDA will be deleted.'
+            Write-Error 'You must accept that All VCDA virtual machines, any custom roles, folders and accounts used by VCDA will be deleted.'
         }
         #get SSO Domain
         $SSO_domain = (Get-IdentitySource -System).name

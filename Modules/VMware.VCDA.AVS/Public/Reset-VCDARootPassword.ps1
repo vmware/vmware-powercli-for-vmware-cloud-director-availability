@@ -23,13 +23,13 @@ function Reset-VCDARootPassword {
     param (
         [Parameter(
             Mandatory = $false,
-            HelpMessage = "Name of the VCDA virtual machine on which the password will be reset.")]
+            HelpMessage = "Reset the password regardless of the expiration date.")]
         [ValidateNotNullOrEmpty()]
         [switch]
         $force,
         [Parameter(
             Mandatory = $false,
-            HelpMessage = "Reset the password regardless of the expiration date.")]
+            HelpMessage = "Name of the VCDA virtual machine on which the password will be reset.")]
         [ValidateNotNullOrEmpty()]
         [string]$VMName
     )
@@ -73,7 +73,7 @@ function Reset-VCDARootPassword {
                 $password_exp_date = (get-date).AddSeconds($password_status.secondsUntilExpiration)
                 if ($password_exp_date.AddDays(-30) -lt (Get-Date) -or $force -eq $true) {
                     Write-Log -message "Trying to set root password of VM '$($vm.name)' ($IP) using current credentials."
-                    #once login is successfull, update current password to old pass in persistentSecrets
+                    #once login is successful, update current password to old pass in persistentSecrets
                     $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.old_password] = ($vm_passwords.current | ConvertFrom-SecureString -AsPlainText)
                     #save_new password to persistentSecrets
                     $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = $new_pass

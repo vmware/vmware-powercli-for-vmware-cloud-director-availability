@@ -2,5 +2,6 @@
 .AppleDouble
 .LSOverride
 *.ova
+.vscode
 # Except this file
 #!.gitignore

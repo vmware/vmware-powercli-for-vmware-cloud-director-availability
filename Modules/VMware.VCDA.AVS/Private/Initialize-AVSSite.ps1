@@ -24,17 +24,17 @@ function Initialize-AVSSite {
             Write-Log -message "Generating Service account password."
             $VCDA_AVS_ADMIN_Password = Get-SsoPasswordPolicy | Get-VCDARandomPassword
             #save password to PersistentSecrets
-            $PersistentSecrets.sa_username = $Script:vcda_avs_params.vsphere.sa_username
+            $PersistentSecrets.'sa-username' = $Script:vcda_avs_params.vsphere.sa_username
             $PersistentSecrets[$Script:vcda_avs_params.vsphere.sa_current_password] = ${VCDA_AVS_ADMIN_Password}
         }
 
         #Create VCDA SSO user
-        $vcda_avs_admin_creds = New-Object System.Management.Automation.PSCredential($PersistentSecrets.sa_username, `
+        $vcda_avs_admin_creds = New-Object System.Management.Automation.PSCredential($PersistentSecrets.'sa-username', `
             ($PersistentSecrets[$Script:vcda_avs_params.vsphere.sa_current_password] | ConvertTo-SecureString -AsPlainText -Force))
         $vcda_service_account = Add-VCDASSOUser -FirstName "VCDA_AVS" -Lastname "Service_Account" -Credentials $vcda_avs_admin_creds -Domain $SSO_domain
 
         #Add_VCDA_Role
-        $vcda_role = Add-VCDARole -Name $Script:vcda_avs_params.vsphere.vsphere_role -user ($SSO_domain + "\" + $PersistentSecrets.sa_username)
+        $vcda_role = Add-VCDARole -Name $Script:vcda_avs_params.vsphere.vsphere_role -user ($SSO_domain + "\" + $PersistentSecrets.'sa-username')
 
 
         #generate appliance initial root password to be changed during config

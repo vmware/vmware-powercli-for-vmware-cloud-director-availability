@@ -8,9 +8,9 @@ $ErrorActionPreference = 'Stop'
 #script variables with default values, if required change names only here:
 $Script:vcda_avs_params = [ordered]@{
     'vsphere' = @{
-        'sa_username'         = 'vcda_avs_admin' #service account username
-        'sa_current_password' = 'sa_current_password' #name of the persistent secret key with the current password
-        'sa_old_password'     = 'sa_old_password' #name of the persistent secret key with the current password
+        'sa_username'         = 'vcda-avs-admin' #service account username
+        'sa_current_password' = 'sa-current-password' #name of the persistent secret key with the current password
+        'sa_old_password'     = 'sa-old-password' #name of the persistent secret key with the current password
         'vsphere_role'        = 'VCDA_AVS_ADMIN' #name of  vsphere role
         'folder'              = 'vmware-avs-vcda' #name of vsphere folder to be create/used as secure folder
         'tag_name'            = 'vmware-avs-vcda-tag' #name of vsphere tag to be created used by VCDA VMs
@@ -18,17 +18,17 @@ $Script:vcda_avs_params = [ordered]@{
     #vcda vms and related persistent secrets names
     'vcda'    = [ordered]@{
         'vm_name'          = @(
-            'VCDA_AVS_Manager_01',
-            'VCDA_AVS_Tunnel_01',
-            'VCDA_AVS_Replicator_01',
-            'VCDA_AVS_Replicator_02',
-            'VCDA_AVS_Replicator_03',
-            'VCDA_AVS_Replicator_04',
-            'VCDA_AVS_Replicator_05',
-            'VCDA_AVS_Replicator_06'
+            'VCDA-AVS-Manager-01',
+            'VCDA-AVS-Tunnel-01',
+            'VCDA-AVS-Replicator-01',
+            'VCDA-AVS-Replicator-02',
+            'VCDA-AVS-Replicator-03',
+            'VCDA-AVS-Replicator-04',
+            'VCDA-AVS-Replicator-05',
+            'VCDA-AVS-Replicator-06'
         )
-        'current_password' = '_current_pass'
-        'old_password'     = '_old_pass'
+        'current_password' = '-current-pass'
+        'old_password'     = '-old-pass'
 
     }
     'ova'     = @{

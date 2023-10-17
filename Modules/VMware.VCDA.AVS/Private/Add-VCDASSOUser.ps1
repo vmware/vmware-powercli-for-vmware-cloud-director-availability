@@ -34,12 +34,12 @@ function Add-VCDASSOUser {
 
         #create user if it doesn't exists
         if ($null -eq $sso_user) {
-            Write-Log -message "Addind VCDA Service account '$username'."
+            Write-Log -message "Adding VCDA Service account '$username'."
             New-SsoPersonUser -UserName $username -Password $password -FirstName $FirstName -LastName $Lastname -Description "VCDA AVS User" -ErrorAction Stop
         }
         #change the password of the user.
         elseif ($ResetPassword.IsPresent)  {
-            Write-Log -message "Reseting '$username' password."
+            Write-Log -message "Resetting '$username' password."
             Set-SsoPersonUser -NewPassword $password -User $sso_user -ErrorAction Stop
         }
         else {

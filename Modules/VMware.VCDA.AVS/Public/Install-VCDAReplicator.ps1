@@ -30,10 +30,10 @@ function Install-VCDAReplicator {
 .PARAMETER OVAFilename
     Name of the VCDA .ova file, located in top folder of the same Datastore where appliance will be deployed (for example: "VCDA-4.6.1.ova")
 .PARAMETER VMName
-    Name of the replicator VM, must match the predifined VM Names.
+    Name of the replicator VM, must match the predefined VM Names.
     ("VCDA_AVS_Replicator_03", "VCDA_AVS_Replicator_04", "VCDA_AVS_Replicator_05", "VCDA_AVS_Replicator_06")
 .PARAMETER AcceptEULA
-    Accept the End User License Agrement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
+    Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
 .EXAMPLE
     $params = @{
         'VMName'              = 'VCDA_AVS_Replicator_03'
@@ -126,14 +126,14 @@ function Install-VCDAReplicator {
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'Name of the replicator VM, must match the predifined VM Names')]
-        [ValidateSet("VCDA_AVS_Replicator_03", "VCDA_AVS_Replicator_04", "VCDA_AVS_Replicator_05", "VCDA_AVS_Replicator_06")]
+            HelpMessage = 'Name of the replicator VM, must match the predefined VM Names')]
+        [ValidateSet("VCDA-AVS-Replicator-03", "VCDA-AVS-Replicator-04", "VCDA-AVS-Replicator-05", "VCDA-AVS-Replicator-06")]
         [string]
         $VMName,
 
         [Parameter(
             Mandatory = $false,
-            HelpMessage = 'Accept the End User License Agrement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
+            HelpMessage = 'Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
         [ValidateNotNullOrEmpty()]
         [switch]
         $AcceptEULA
@@ -145,7 +145,7 @@ function Install-VCDAReplicator {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         if ($AcceptEULA -ne $true) {
-            Write-Error 'You must accept the End User Licenase Aggrement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
+            Write-Error 'You must accept the End User License Agreement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
         }
         $manager_vm = Get-VCDAVM -type cloud
         if ($null -eq $manager_vm) {

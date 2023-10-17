@@ -43,7 +43,7 @@ function Install-VCDAAVS {
     vSphere network to be used for deployment of the Tunnel appliance
 .PARAMETER Replicator1IPAddress
     IPv4 address in CIDR notation (for example 192.168.0.224/24) to be used for deployment of the First (1st) Replicator appliance
-.PARAMETER Replicato1Hostname
+.PARAMETER Replicator1Hostname
     Hostname of the First (1st) Replicator appliance
 .PARAMETER Replicator2IPAddress
     IPv4 address in CIDR notation (for example 192.168.0.225/24) to be used for deployment of the Second (2nd) Replicator appliance
@@ -62,7 +62,7 @@ function Install-VCDAAVS {
 .PARAMETER OVAFilename
     Name of the VCDA .ova file, located in top folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.6.1.ova")
 .PARAMETER AcceptEULA
-    Accept the End User License Agrement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
+    Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
 .EXAMPLE
     $params = @{
         'License'              = 'XXXX-XXXX-XXXX-XXXX-XXXX'
@@ -82,7 +82,7 @@ function Install-VCDAAVS {
         'TunnelHostname'       = 'vcda-t01'
         'TunnelNetwork'        = 'vcda-network'
         'Replicator1IPAddress' = '192.168.0.224/24'
-        'Replicato1Hostname'   = 'vcda-r01'
+        'Replicator1Hostname'   = 'vcda-r01'
         'Replicator2IPAddress' = '192.168.0.225/24'
         'Replicator2Hostname'  = 'vcda-r02'
         'ReplicatorGW'         = '192.168.0.1'
@@ -221,7 +221,7 @@ function Install-VCDAAVS {
             HelpMessage = 'Hostname of the First (1st) Replicator appliance')]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Replicato1Hostname,
+        $Replicator1Hostname,
 
         [Parameter(
             Mandatory = $true,
@@ -280,7 +280,7 @@ function Install-VCDAAVS {
         $OVAFilename,
         [Parameter(
             Mandatory = $false,
-            HelpMessage = 'Accept the End User License Agrement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
+            HelpMessage = 'Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
         [ValidateNotNullOrEmpty()]
         [switch]
         $AcceptEULA
@@ -293,7 +293,7 @@ function Install-VCDAAVS {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         if ($AcceptEULA -ne $true) {
-            Write-Error 'You must accept the End User Licenase Aggrement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
+            Write-Error 'You must accept the End User License Agreement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
         }
         #Prepare the SDDC
         Initialize-AVSSite
@@ -327,7 +327,7 @@ function Install-VCDAAVS {
         $LocalvarRepl01Params = @{
             'IPAddress' = $Replicator1IPAddress
             'Gateway'   = $ReplicatorGW
-            'hostname'  = $Replicato1Hostname
+            'hostname'  = $Replicator1Hostname
         }
         $LocalvarRepl02Params = @{
             'IPAddress' = $Replicator2IPAddress
@@ -336,7 +336,7 @@ function Install-VCDAAVS {
         }
 
         #1 deploy manager
-        $man_vm_name = 'VCDA_AVS_Manager_01'
+        $man_vm_name = 'VCDA-AVS-Manager-01'
         $man_pass = Get-VCDAVMPassword -name $man_vm_name
         $manager_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarManagerParams -DeploymentOption cloud -Name $man_vm_name `
             -network $ManagerNetwork -password $man_pass.old
@@ -344,7 +344,7 @@ function Install-VCDAAVS {
         #$manager_vm | Add-VCDATag
 
         #2 deploy tunnel
-        $tun_vm_name = 'VCDA_AVS_Tunnel_01'
+        $tun_vm_name = 'VCDA-AVS-Tunnel-01'
         $tun_pass = Get-VCDAVMPassword -name $tun_vm_name
         $tunnel_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarTunnelParams -DeploymentOption tunnel -Name $tun_vm_name `
             -network $TunnelNetwork -password $tun_pass.old
@@ -352,7 +352,7 @@ function Install-VCDAAVS {
         #$tunnel_vm | Add-VCDATag
 
         #3 deploy replicator 1
-        $repl1_vm_name = 'VCDA_AVS_Replicator_01'
+        $repl1_vm_name = 'VCDA-AVS-Replicator-01'
         $repl1_pass = Get-VCDAVMPassword -name $repl1_vm_name
         $repl1_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarRepl01Params -DeploymentOption replicator -Name $repl1_vm_name `
             -network $ReplicatorNetwork -password $repl1_pass.old
@@ -360,7 +360,7 @@ function Install-VCDAAVS {
         #$repl1_vm | Add-VCDATag
 
         #4 deploy replicator 2
-        $repl2_vm_name = 'VCDA_AVS_Replicator_02'
+        $repl2_vm_name = 'VCDA-AVS-Replicator-02'
         $repl2_pass = Get-VCDAVMPassword -name $repl2_vm_name
         $repl2_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarRepl02Params -DeploymentOption replicator -Name $repl2_vm_name `
             -network $ReplicatorNetwork -password $repl2_pass.old

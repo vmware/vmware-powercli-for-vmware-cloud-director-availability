@@ -22,8 +22,6 @@ function Add-VCDARole {
     )
 
     $Privileges = @(
-        "Cryptographer.ManageKeys"
-        "Cryptographer.RegisterHost"
         "Datastore.Browse"
         "Datastore.Config"
         "Datastore.FileManagement"
@@ -34,7 +32,7 @@ function Add-VCDARole {
         "StorageProfile.View"
         "Resource.AssignVMToPool"
         "StorageViews.View"
-        "VirtualMachine.Config.AddNewDisk"
+        "VirtualMachine.Config.AddExistingDisk"
         "VirtualMachine.Config.Settings"
         "VirtualMachine.Config.RemoveDisk"
         "VirtualMachine.Inventory.Register"

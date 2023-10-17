@@ -7,6 +7,7 @@ function Get-RemoteCert {
     param (
         # VCDA Server
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [string]$url,
         # type
         [Parameter(Mandatory = $true)]
