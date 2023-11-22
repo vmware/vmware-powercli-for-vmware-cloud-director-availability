@@ -299,7 +299,7 @@ function Install-VCDAAVS {
         Initialize-AVSSite
 
         #get folder
-        $vm_folder = Get-Folder $Script:vcda_avs_params.vsphere.folder -Type VM
+        $vm_folder = Get-Folder -Name $Script:vcda_avs_params.vsphere.folder -Type VM -Location ([AVSSecureFolder]::root())
         $LocalVarCommonParams = @{
             'OVAFilename'       = $OVAFilename
             'NTP'               = $NTPServer

@@ -74,6 +74,14 @@ function Uninstall-VCDAAVS {
             else {
                 Write-Log -message "vCenter Role '$($Script:vcda_avs_params.vsphere.vsphere_role)' not found."
             }
+            $group = Get-SsoGroup -Name "VrAdministrators" -Domain $SSO_domain
+            if ($null -ne $group){
+                Write-Log -message "Removing vCenter group 'VrAdministrators'."
+                Remove-SsoGroup -Group $group
+            }
+            else {
+                Write-Log -message "vCenter Group 'VrAdministrators' not found."
+            }
             #remove the secure folder
             $vm_folder = Get-Folder -Name $Script:vcda_avs_params.vsphere.folder -ErrorAction SilentlyContinue
             if ($null -ne $vm_folder) {

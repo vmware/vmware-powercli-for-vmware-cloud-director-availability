@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause
     RootModule           = 'VMware.VCDA.AVS.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.0.2'
+    ModuleVersion        = '0.0.3'
 
     # Supported PSEditions
     CompatiblePSEditions = 'core'
@@ -74,7 +74,8 @@ SPDX-License-Identifier: BSD-2-Clause
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Install-VCDAAVS', 'Uninstall-VCDAAVS', 'Stop-VCDAVM', 'Start-VCDAVM', 'Install-VCDAAVS', 'Install-VCDAReplicator',
-    'Reset-VCDARootPassword', 'Repair-LocalReplicator', 'Reset-ServiceAccountPassword'
+    'Reset-VCDARootPassword', 'Repair-LocalReplicator', 'Reset-ServiceAccountPassword', 'Repair-LookupService', 'Get-VCDAReport', 'New-VCDAVMSnapshot',
+    'Remove-VCDAVMSnapshot'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = @()

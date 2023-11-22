@@ -59,7 +59,7 @@ function Reset-VCDARootPassword {
             }
             $remote_cert = Get-RemoteCert -url ('https://' + $IP) -type string
             if ($remote_cert -ne $service_cert) {
-                Write-Error "Ceritificates doesn't match."
+                Write-Error "Certificates doesn't match."
             }
             $vm_passwords = (Get-VCDAVMPassword -name ($vm.Name))
             $old_creds = New-Object System.Management.Automation.PSCredential("root", $vm_passwords.old)

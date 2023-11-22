@@ -22,12 +22,12 @@ function Get-VCDAVM {
     )
     Try {
 
-        $vm_folder = Get-Folder -Name $Script:vcda_avs_params.vsphere.folder -ErrorAction SilentlyContinue
+        $vm_folder = Get-Folder -Name $Script:vcda_avs_params.vsphere.folder -Type VM -Location ([AVSSecureFolder]::root()) -ErrorAction SilentlyContinue
         if ($null -eq $vm_folder) {
             #Write-log "VM folder '$($Script:vcda_avs_params.vsphere.folder)' not found, VCDA is not deployed."
             return
         }
-        $vms = get-vm -Location $Script:vcda_avs_params.vsphere.folder | Where-Object { $_.ExtensionData.Config.VAppConfig.Product.name -eq 'VMware Cloud Director Availability' }
+        $vms = get-vm -Location $vm_folder | Where-Object { $_.ExtensionData.Config.VAppConfig.Product.name -eq 'VMware Cloud Director Availability' }
 
         switch ($type) {
             'cloud' {
@@ -43,12 +43,12 @@ function Get-VCDAVM {
                         -and $_.extensionData.Config.vappConfig.Property.DefaultValue -eq "tunnel" }
             }
         }
-        #filter reulst based on the VM name
+        #filter results based on the VM name
         if ($PSBoundParameters['VMName']) {
             $Vms = $VMs | Where-Object { $_.Name -eq $VMName }
         }
 
-        return $vms
+        return $vms | Sort-Object
     }
     Catch {
         write-error -Message $_.exception.Message -ErrorAction Stop

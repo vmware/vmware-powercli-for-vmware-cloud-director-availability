@@ -36,6 +36,8 @@ function Initialize-AVSSite {
         #Add_VCDA_Role
         $vcda_role = Add-VCDARole -Name $Script:vcda_avs_params.vsphere.vsphere_role -user ($SSO_domain + "\" + $PersistentSecrets.'sa-username')
 
+        #create "VR_ADMINISTRATORS" group and add "cloudadmin" user to it. This will give admin access to vcda appliances.
+        Add-VCDASSOGroup -Name "VrAdministrators" -Description "vcda admins group" -user "cloudadmin" -Domain $SSO_domain
 
         #generate appliance initial root password to be changed during config
         foreach ($appliance in $Script:vcda_avs_params.vcda.vm_name) {
