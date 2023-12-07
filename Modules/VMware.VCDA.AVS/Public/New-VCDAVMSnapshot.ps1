@@ -47,14 +47,14 @@ function New-VCDAVMSnapshot {
             HelpMessage = 'If the value is $true and the virtual machine is powered on, VMware Tools are used to quiesce the file system of the virtual machine.
             This assures that a disk snapshot represents a consistent state of the guest file systems. If the virtual machine is powered
             off or VMware Tools are not available, the Quiesce parameter is ignored.'
-            )]
+        )]
         [ValidateNotNullOrEmpty()]
         [switch]
         $Quiesce,
         [Parameter(
             Mandatory = $false,
             HelpMessage = "If the value is `$true and if the virtual machine is powered on, the virtual machine's memory state is preserved with the snapshot."
-            )]
+        )]
         [ValidateNotNullOrEmpty()]
         [switch]
         $Memory
@@ -66,10 +66,35 @@ function New-VCDAVMSnapshot {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         $VCDA_VMs = Get-VCDAVM -VMName $PSBoundParameters.VMName
+        if ($VCDA_VMs.count -eq 0) {
+            Write-Log -message "No VCDA VMs found."
+            return
+        }
         $PSBoundParameters.Remove('VMName') | Out-Null
-        $snapshot = $VCDA_VMs | New-Snapshot @PSBoundParameters
-        write-log -message "Created snapshots:
-        $($snapshot | Select-Object vm, name, Id, Created, PowerState, Quiesced, SizeGB | Format-Table -AutoSize | Out-String)"
+        $snapshots = @()
+        foreach ($vm in $VCDA_VMs) {
+            if (($vm | Get-Snapshot).count -cge 2 ) {
+                Write-log -message "$($vm.name) have more than 2 snapshots, first delete older snapshot(s) and try again. "
+            }
+            else {
+                try {
+                    Write-log -message "Creating snapshot of VM $($vm.name)."
+                    $snapshot = $vm | New-Snapshot @PSBoundParameters
+                    $snapshots += $snapshot
+                }
+                catch {
+                    Write-log -message "There was an error while creating a snapshot of '$vm': $_"
+                    Write-Error $_ -ErrorAction Continue
+                }
+            }
+        }
+        if ($snapshots.count -gt 0) {
+            write-log -message "Created snapshots:
+            $($snapshots | Select-Object vm, name, Id, Created, PowerState,  @{N = "Quiesced"; E = { $_.ExtensionData.Quiesced } }, SizeGB | Format-Table -AutoSize | Out-String)"
+        }
+        elseif ($snapshots.count -eq 0) {
+            Write-log -message "No snapshots created."
+        }
     }
     Catch {
         $PSCmdlet.ThrowTerminatingError($_)

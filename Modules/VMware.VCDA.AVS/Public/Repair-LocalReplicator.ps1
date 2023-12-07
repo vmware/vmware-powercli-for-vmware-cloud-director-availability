@@ -27,10 +27,21 @@ function Repair-LocalReplicator {
         if ($null -eq ((Get-View SessionManager -Server $global:DefaultVIServer).CurrentSession)) {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
+        Write-log -message "Starting repairing of local replicators."
         $manager_vm = Get-VCDAVM -type "cloud"
+        if ($null -eq $manager_vm){
+            Write-Log -message "No Manager VM found, cannot repair replicators."
+            return
+        }
         $replicator_vms = Get-VCDAVM -type "replicator" -vmname $VMName
-
+        if ($null -eq $replicator_vms){
+            Write-Log -message "No Replicator VMs found, cannot repair replicators."
+            return
+        }
         $manager_ip = $manager_vm.ExtensionData.guest.IpAddress
+        if ($null -eq $manager_ip) {
+            Write-Error "Can't find the IP address of VM '$($manager_vm.name)', and cannot proceed with repair of replicators.'"
+        }
         $manager_service_cert = ($manager_vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.manager.certificate' }).value
         $manager_url = 'https://' + $manager_ip + ':8441'
         #make sure the certificate we see over the network matches the one of the VM.
@@ -55,7 +66,7 @@ function Repair-LocalReplicator {
                 $replicator_creds = New-Object System.Management.Automation.PSCredential("root", $replicator_pass.current)
                 $replicator_ip = $replicator.ExtensionData.guest.IpAddress
                 if ($null -eq $replicator_ip) {
-                    Write-Error "Failed to get the IP address of VM $($replicator.name)"
+                    Write-Error "Failed to get the IP address of VM $($replicator.name)."
                 }
                 $replicator_service_cert = ($replicator.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.replicator.certificate' }).value
                 $replicator_remote_cert = Get-RemoteCert -url "https://$replicator_ip" -type string
@@ -65,6 +76,10 @@ function Repair-LocalReplicator {
                 $replicator_server = Connect-VCDA -server $replicator_ip -AuthType Local -Credentials $replicator_creds -port 8043 -SkipCertificateCheck -NotDefault
                 $id = (Get-Config -Server $replicator_server).id
                 $replicator_to_repair = Get-VCDAReplicator -Server $vcda_server | Where-Object { $_.id -eq $id }
+                if ($null -eq $replicator_to_repair){
+                    Write-Log -message "Replicator $($replicator.name)' ($replicator_ip) not registered with manager." -LogPrefix "[ERROR]"
+                    Write-Error "Replicator $($replicator.name)' ($replicator_ip) not registered with manager."
+                }
                 $InvokeParams = @{
                     'apiUrl'        = $replicator_to_repair.apiUrl
                     'apiThumbprint' = ""
@@ -76,8 +91,10 @@ function Repair-LocalReplicator {
                 }
                 Write-Log -message "Repairing Replicator VM '$($replicator.name)' ($replicator_ip)."
                 $response = Repair-VCDAReplicator @InvokeParams
+                Write-Log -message "Replicator VM '$($replicator.name)' ($replicator_ip) repaired successfully."
             }
             catch {
+                Write-Log -message $_ -LogPrefix "[ERROR]"
                 Write-Error $_ -ErrorAction Continue
             }
         }

@@ -5,13 +5,19 @@ SPDX-License-Identifier: BSD-2-Clause
 function Initialize-AVSSite {
     <#
     .DESCRIPTION
-    Prepare AVS Site for VCDA deployment
+    Prepare AVS Site for VCDA deployment.
+    This command will prepare the SDDC and AVS environment for VCDA installation.
+    Create vSphere service account, role, group,  generate password,
     #>
     [CmdletBinding()]
     param ()
 
     try {
         Write-Log -message "Starting Initialize-AVSSite"
+        #make sure vc connection is healthy, script will fail if not
+        if ($null -eq ((Get-View SessionManager -Server $global:DefaultVIServer).CurrentSession)) {
+            Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
+        }
         #get SSO Domain
         $SSO_domain = (Get-IdentitySource -System).name
         Write-Log -message "SSO Domain is $SSO_Domain"
@@ -58,6 +64,7 @@ function Initialize-AVSSite {
                 $persistentSecrets[$appliance + $Script:vcda_avs_params.vcda.current_password] = $root_password
             }
         }
+        Write-Log -message "Completed Initialize-AVSSite"
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

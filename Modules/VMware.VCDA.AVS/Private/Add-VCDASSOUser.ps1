@@ -30,7 +30,7 @@ function Add-VCDASSOUser {
     try {
         $username = $Credentials.UserName
         $password = $Credentials.GetNetworkCredential().Password
-        $sso_user = Get-SsoPersonUser -Name $username -Domain $Domain
+        $sso_user = Get-SsoPersonUser -Name $username -Domain $Domain | Where-Object {$_.name -eq $username}
 
         #create user if it doesn't exists
         if ($null -eq $sso_user) {

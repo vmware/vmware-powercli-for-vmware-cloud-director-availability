@@ -17,7 +17,7 @@ function Get-VCDAPassExp {
             }
 
             $LocalvarInvokeParams = @{
-                'path'   = '/appliance/root-password-expired'
+                'path'   = '/config/root-password-expired'
                 'method' = 'GET'
                 'client' = $LocalvarServer
             }

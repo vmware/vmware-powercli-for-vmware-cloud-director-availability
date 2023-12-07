@@ -8,9 +8,12 @@ function Register-Tunnel {
         # VCDA Mnager VM
         [Parameter(Mandatory = $false)]
         $VCDA_Manager_VM,
-        # VCDA Mnager VM
+        # VCDA Tunnel VM
         [Parameter(Mandatory = $false)]
-        $VCDA_tunnel_vm
+        $VCDA_tunnel_vm,
+        # log prefix
+        [Parameter(Mandatory = $false)]
+        [string]$LogPrefix
     )
     process {
         try {
@@ -23,7 +26,7 @@ function Register-Tunnel {
             $manager_ip = $VCDA_Manager_VM.ExtensionData.guest.IpAddress
             $tunnel_ip = $VCDA_tunnel_vm.ExtensionData.guest.IpAddress
 
-            Write-Log -message "Configure Tunnel service with IP '$tunnel_ip'"
+            Write-Log -message "Register the Tunnel Service '$($VCDA_tunnel_vm.name)' ($tunnel_ip) with the Cloud Service '$($VCDA_Manager_vm.name)' ($manager_ip)." -LogPrefix $LogPrefix
 
             $manager_service_cert = ($VCDA_Manager_VM.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.cloud.certificate' }).value
 
@@ -32,7 +35,7 @@ function Register-Tunnel {
             $manager_url = 'https://' + $manager_ip
             $manager_remote_cert = Get-RemoteCert -url  $manager_url -type string
             if ($manager_remote_cert -ne $manager_service_cert) {
-                Write-Error "Ceritificates doesn't match."
+                Write-Error "Certificates doesn't match."
             }
             $man_pass = Get-VCDAVMPassword -name $VCDA_Manager_VM.Name
             $tun_pass = Get-VCDAVMPassword -name $VCDA_tunnel_vm.Name
@@ -42,7 +45,7 @@ function Register-Tunnel {
             $url = 'https://' + $tunnel_ip + ':8047'
             $configured_tunnel = Get-Tunnel -url $url -server $vcda_server
             if ($configured_tunnel) {
-                Write-Log -message "Tunnel Service already configured."
+                Write-Log -message "Tunnel Service already configured." -LogPrefix $LogPrefix
             }
             else {
                 $LocalvarInvokeParams = @{
@@ -51,7 +54,7 @@ function Register-Tunnel {
                     'rootPassword' = ($tun_pass.current | ConvertFrom-SecureString -AsPlainText)
                 }
                 Set-Tunnel @LocalvarInvokeParams -server $vcda_server | Out-Null
-                Write-Log -message "Tunnel Service successfully configured."
+                Write-Log -message "Tunnel Service successfully configured." -LogPrefix $LogPrefix
             }
         }
         catch {

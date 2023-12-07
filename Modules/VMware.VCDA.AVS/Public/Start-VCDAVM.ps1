@@ -35,6 +35,10 @@ function Start-VCDAVM {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         $VCDA_VMs = Get-VCDAVM -VMName $PSBoundParameters.VMName
+        if ($VCDA_VMs.count -eq 0) {
+            Write-Log -message "No VCDA VMs found using the specified filter."
+            return
+        }
         foreach ($VM in $VCDA_VMs) {
             if ($vm.PowerState -ne 'PoweredOn') {
                 Write-Log -message "Power on VM '$($vm.name)'."

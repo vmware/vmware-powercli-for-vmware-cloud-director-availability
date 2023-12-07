@@ -71,7 +71,10 @@ function Install-VCDAReplicator {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'IPv4 address in CIDR notation (for example 192.168.0.226/24) to be used for deployment of the Replicator appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                [System.Net.IPAddress]($_.split("/")[0]) -and 0..32 -contains $_.Split("/")[1]
+            }, ErrorMessage = "'{0}' is not valid format, IPv4 address in CIDR notation (for example 192.168.0.226/24)"
+        )]
         [string]
         $ReplicatorIPAddress,
 
@@ -85,7 +88,7 @@ function Install-VCDAReplicator {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Gateway IP address for the Replicator appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [System.Net.IPAddress]($_) })]
         [string]
         $ReplicatorGW,
 
@@ -119,7 +122,7 @@ function Install-VCDAReplicator {
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'Name of the VCDA .ova file, located in top folder of the same Datastore where appliance will be deployed (for example: "VCDA-4.6.1.ova")')]
+            HelpMessage = 'Name of the VCDA .ova file, located in folder of the same Datastore where appliance will be deployed (for example: "VCDA-4.6.1.ova")')]
         [ValidateNotNullOrEmpty()]
         [string]
         $OVAFilename,

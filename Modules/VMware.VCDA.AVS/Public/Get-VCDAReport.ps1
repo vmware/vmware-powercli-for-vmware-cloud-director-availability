@@ -22,9 +22,9 @@ function Get-VCDAReport {
         #get SSO Domain
         $SSO_domain = (Get-IdentitySource -System).name
         #check service account
-        $sa_user = Get-SsoPersonUser -Name $PersistentSecrets.'sa-username' -Domain $SSO_domain
+        $sa_user = Get-SsoPersonUser -Name $Script:vcda_avs_params.vsphere.sa_username -Domain $SSO_domain | Where-Object {$_.name -eq $Script:vcda_avs_params.vsphere.sa_username}
         if ($null -eq $sa_user) {
-            Write-Host "Service account '$($PersistentSecrets.'sa-username')' was not found"
+            Write-Log -message "VCDA Service account was not found."
         }
         else {
             Write-Host "Service Account info:"
@@ -32,6 +32,10 @@ function Get-VCDAReport {
         }
 
         $vcda_vms = Get-VCDAVM
+        if ($vcda_vms.count -eq 0){
+            Write-Log -message "No VCDA VMs found, VCDA is not installed."
+            return
+        }
         Write-Host "Virtual Machines info:"
 
         Write-Host ($vcda_vms | Select-Object name, PowerState, `
@@ -41,8 +45,9 @@ function Get-VCDAReport {
 
         Write-Host "Snapshots:"
         $snapshots = $vcda_vms | Get-Snapshot
-        if ($null -ne $snapshots ){
-            Write-Host ($snapshots | Select-Object vm, name, Id, Created, PowerState, Quiesced, SizeGB | Format-Table -AutoSize | Out-String)
+        if ($null -ne $snapshots ) {
+            Write-Host ($snapshots | Select-Object vm, name, Id, Created, PowerState, @{N = "Quiesced"; E = { $_.ExtensionData.Quiesced } }, `
+                    SizeGB | Format-Table -AutoSize | Out-String)
         }
         else {
 
@@ -80,13 +85,13 @@ function Get-VCDAReport {
 
                 #check certificate expiration
                 $local_cert = Get-LocalCert -server $vcda_server | Select-Object @{N = "VM_Name"; E = { $vm.name } }, @{N = "service"; E = { $vcda_server.ServiceType } }, `
-                @{N = "issuedTo"; E = { $_.certificate.issuedTo.CN } }, @{N = "Expires_On"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) } },`
-                @{N = "expired"; E = {([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) -lt (get-date) } }
+                @{N = "issuedTo"; E = { $_.certificate.issuedTo.CN } }, @{N = "Expires_On"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) } }, `
+                @{N = "expired"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) -lt (get-date) } }
                 $result.Certificates += $local_cert
 
                 #check lookup service thumbprint.
                 $result.LookupService += $config | Select-Object @{N = "VM_Name"; E = { $vm.name } }, @{N = "service"; E = { $vcda_server.ServiceType } }, `
-                @{N = "ConfiguredThumbprint"; E = { $_.lsThumbprint } }, @{N = "match"; E = { $lookup_service_sha -match $_.lsThumbprint } }
+                @{N = "match"; E = { $lookup_service_sha -match $_.lsThumbprint } }, @{N = "ConfiguredThumbprint"; E = { $_.lsThumbprint } }
 
                 #if connected to cloud service (aka manager appliance) check manager service as well
                 if ($vcda_server.ServiceType -eq "CLOUD") {
@@ -94,13 +99,13 @@ function Get-VCDAReport {
                     $config = get-config -Server $vcda_server
                     #check certificate expiration
                     $local_cert = Get-LocalCert -server $vcda_server | Select-Object @{N = "VM_Name"; E = { $vm.name } }, @{N = "service"; E = { $vcda_server.ServiceType } }, `
-                    @{N = "issuedTo"; E = { $_.certificate.issuedTo.CN } }, @{N = "Expires_On"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) } },`
-                    @{N = "expired"; E = {([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) -lt (get-date) } }
+                    @{N = "issuedTo"; E = { $_.certificate.issuedTo.CN } }, @{N = "Expires_On"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) } }, `
+                    @{N = "expired"; E = { ([datetime]::UnixEpoch.AddMilliseconds($_.certificate.expiresOn).ToLocalTime()) -lt (get-date) } }
                     $result.Certificates += $local_cert
 
                     #check lookup service thumbprint.
                     $result.LookupService += $config | Select-Object @{N = "VM_Name"; E = { $vm.name } }, @{N = "service"; E = { $vcda_server.ServiceType } }, `
-                    @{N = "ConfiguredThumbprint"; E = { $_.lsThumbprint } }, @{N = "match"; E = { $lookup_service_sha -match $_.lsThumbprint } }
+                    @{N = "match"; E = { $lookup_service_sha -match $_.lsThumbprint } }, @{N = "ConfiguredThumbprint"; E = { $_.lsThumbprint } }
                 }
             }
             catch {
@@ -114,11 +119,11 @@ function Get-VCDAReport {
         Write-Host "Lookup Service Status:
         Server Thumbprint is '$lookup_service_sha',
         If ConfiguredThumbprint doesn't match run the 'Repair-LookupService' command to update the lookup service."
-        Write-Host ($result.LookupService | Format-Table -AutoSize | Out-String)
+        Write-Host ($result.LookupService | Format-Table -AutoSize -Wrap | Out-String)
         #Write-Host "The following servers lookup service doesn't match:
         #$($result.LookupService | Where-Object {$_.match -match "False"} | Format-Table -AutoSize | Out-String)" -ForegroundColor Yellow
 
-           #Write-Host "The following servers lookup service doesn't match:
+        #Write-Host "The following servers lookup service doesn't match:
         #$($result.LookupService | Where-Object {$_.match -match "False"} | Format-Table -AutoSize | Out-String) | Write-Host "The following servers lookup service doesn't match:" $_
     }
     Catch {

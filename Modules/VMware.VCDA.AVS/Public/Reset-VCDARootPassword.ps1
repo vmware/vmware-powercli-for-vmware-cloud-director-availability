@@ -54,7 +54,7 @@ function Reset-VCDARootPassword {
             }
             $IP = $VM.guest.ExtensionData.IpAddress
             if ($null -eq $IP){
-                Write-Log -message "Can't find IP address of VM $($vm.name), VM power state is: '$($vm.PowerState)'."
+                Write-Log -message "$($vm.name): Can't find IP address of the VM, VM power state is: '$($vm.PowerState)'."
                 continue
             }
             $remote_cert = Get-RemoteCert -url ('https://' + $IP) -type string
@@ -72,15 +72,18 @@ function Reset-VCDARootPassword {
                 $password_status = Get-VCDAPassExp -Server $vcda_server
                 $password_exp_date = (get-date).AddSeconds($password_status.secondsUntilExpiration)
                 if ($password_exp_date.AddDays(-30) -lt (Get-Date) -or $force -eq $true) {
-                    Write-Log -message "Trying to set root password of VM '$($vm.name)' ($IP) using current credentials."
+                    Write-Log -message "'$($vm.name)' ($IP): Trying to set root password using current credentials."
                     #once login is successful, update current password to old pass in persistentSecrets
                     $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.old_password] = ($vm_passwords.current | ConvertFrom-SecureString -AsPlainText)
                     #save_new password to persistentSecrets
                     $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = $new_pass
-                    Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.current | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
+                    $pass = Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.current | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
+                    if ($pass -eq "Root Password Changed Successfully."){
+                        Write-log -message  "'$($vm.name)' ($IP): root password changed successfully."
+                    }
                 }
                 else {
-                    Write-Log -message "Root password of VM '$($vm.name)' ($IP) will expire on: $password_exp_date, use force option to reset the password anyway. "
+                    Write-Log -message "'$($vm.name)' ($IP): root password will expire on: $password_exp_date, use force option to reset the password anyway."
                 }
             }
             #in case current password is not correct try login with old pass (in case previous run has failed and password was not change successfully)
@@ -91,15 +94,18 @@ function Reset-VCDARootPassword {
                     $password_status = Get-VCDAPassExp -Server $vcda_server
                     $password_exp_date = (get-date).AddSeconds($password_status.secondsUntilExpiration)
                     if ($password_exp_date.AddDays(-30) -lt (Get-Date) -or $force -eq $true) {
-                        Write-Log -message "Trying to set root password of VM '$($vm.name)' ($IP) using old credentials."
+                        Write-Log -message "'$($vm.name)' ($IP): Trying to set root password using current credentials."
                         #set the current creds to the proper one
                         $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = $new_pass
-                        Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
+                        $pass = Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
+                        if ($pass -eq "Root Password Changed Successfully."){
+                            Write-log -message "'$($vm.name)' ($IP): root password changed successfully."
+                        }
                     }
                     else {
                         $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText)
                         #set current password to old password which is the correct one.
-                        Write-Log -message "Root password of VM '$($vm.name)' ($IP) will expire on: $password_exp_date, use force option to reset the password anyway. "
+                        Write-Log -message "'$($vm.name)' ($IP): root password will expire on: $password_exp_date, use force option to reset the password anyway."
                     }
                 }
                 else {

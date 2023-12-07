@@ -57,10 +57,16 @@ function Uninstall-VCDAAVS {
         #proceed with clean up if all VMs are removed successfully
         if ($null -eq (Get-VCDAVM)) {
             #remove sso uer
-            $sso_user = Get-SsoPersonUser -Name $Script:vcda_avs_params.vsphere.sa_username -Domain $SSO_domain
+            $sso_user = Get-SsoPersonUser -Name $Script:vcda_avs_params.vsphere.sa_username -Domain $SSO_domain | Where-Object {$_.name -eq $Script:vcda_avs_params.vsphere.sa_username}
             if ($null -ne $sso_user) {
-                Write-Log -message "Removing VCDA service account user '$($Script:vcda_avs_params.vsphere.sa_username)'"
-                Remove-SsoPersonUser -User $sso_user
+                if ($sso_user.count -eq 1){
+                    Write-Log -message "Removing VCDA service account user '$($Script:vcda_avs_params.vsphere.sa_username)'"
+                    Remove-SsoPersonUser -User $sso_user
+                }
+                else {
+                     Write-Log -message "Found more than one service account cannot remove the account."
+                     Write-Error "Service account not deleted." -ErrorAction Continue
+                }
             }
             else {
                 Write-Log -message "VCDA service account '$($Script:vcda_avs_params.vsphere.sa_username)' not found."

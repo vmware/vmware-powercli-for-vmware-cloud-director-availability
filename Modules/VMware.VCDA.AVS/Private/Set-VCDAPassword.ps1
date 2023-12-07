@@ -44,7 +44,7 @@ function Set-VCDAPassword {
             }
             $LocalVarResponse = Invoke-VCDARequest @LocalvarInvokeParams
             if ($LocalVarResponse.StatusCode -eq 204 ) {
-                Write-Log -message 'Root Password Changed Successfully'
+                return 'Root Password Changed Successfully.'
             }
         }
         catch {

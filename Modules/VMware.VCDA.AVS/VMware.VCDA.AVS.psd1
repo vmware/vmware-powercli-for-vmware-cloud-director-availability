@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause
     RootModule           = 'VMware.VCDA.AVS.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.0.3'
+    ModuleVersion        = '0.0.8'
 
     # Supported PSEditions
     CompatiblePSEditions = 'core'
@@ -55,7 +55,7 @@ SPDX-License-Identifier: BSD-2-Clause
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules      = @(@{ModuleName = 'Microsoft.AVS.Management'; RequiredVersion = '5.3.88'; })
+    RequiredModules      = @(@{ModuleName = 'Microsoft.AVS.Management'; RequiredVersion = '6.0.112'; })
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -75,7 +75,7 @@ SPDX-License-Identifier: BSD-2-Clause
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Install-VCDAAVS', 'Uninstall-VCDAAVS', 'Stop-VCDAVM', 'Start-VCDAVM', 'Install-VCDAAVS', 'Install-VCDAReplicator',
     'Reset-VCDARootPassword', 'Repair-LocalReplicator', 'Reset-ServiceAccountPassword', 'Repair-LookupService', 'Get-VCDAReport', 'New-VCDAVMSnapshot',
-    'Remove-VCDAVMSnapshot'
+    'Remove-VCDAVMSnapshot', 'Initialize-AVSSite'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = @()
@@ -116,7 +116,7 @@ SPDX-License-Identifier: BSD-2-Clause
             # ReleaseNotes = ''
 
             # Prerelease string of this module
-            Prerelease = 'dev'
+            Prerelease = 'preview'
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update/save
             # RequireLicenseAcceptance = $false

@@ -17,12 +17,14 @@ function Get-VCDAVMPassword {
         [string]$name
     )
     Try {
-        $currtent_password = $persistentSecrets[$name + $Script:vcda_avs_params.vcda.current_password] | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
+        $current_password = $persistentSecrets[$name + $Script:vcda_avs_params.vcda.current_password] | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
         $old_password = $persistentSecrets[$name + $Script:vcda_avs_params.vcda.old_password] | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
-
+        if ($null -eq $current_password){
+            Write-Error "Failed to get root password for VM '$Name'."
+        }
         return @{
             name    = $name
-            current = $currtent_password
+            current = $current_password
             old     = $old_password
         }
     }

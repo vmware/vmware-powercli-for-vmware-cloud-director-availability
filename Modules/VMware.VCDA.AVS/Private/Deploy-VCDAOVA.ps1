@@ -71,44 +71,56 @@ function Deploy-VCDAOVA {
         $InventoryLocation,
         [Parameter(Mandatory = $true)]
         [string]
-        $Cluster
+        $Cluster,
+        [Parameter(Mandatory = $false)]
+        [string]
+        $LogPrefix
     )
 
     try {
         $vm = Get-VCDAVM -VMName $Name
         if ($null -ne $vm) {
-            Write-Log "VM with name '$name' already deployed."
-            if ($vm.PowerState -ne 'PoweredOn') {
-                Write-Log -message "Power on VM '$($vm.name)'."
-                return Start-VM -VM $vm
+            Write-Log "VM with name: '$name' already deployed." -LogPrefix $LogPrefix
+        }
+        if ($null -eq $vm) {
+            if ($null -eq $script:ova_file) {
+                $script:ova_file = Get-VCDAOva -Datastore $Datastore -OVAFilename $OVAFilename -LogPrefix $LogPrefix
             }
-            else {
-                return $vm
+            $ovf_config = Get-OvfConfiguration -Ovf $script:ova_file
+            $ovf_config.DeploymentOption.Value = $DeploymentOption
+            $ovf_config.Common.guestinfo.cis.appliance.root.password.Value = ($password | ConvertFrom-SecureString -AsPlainText)
+            $ovf_config.Common.guestinfo.cis.appliance.ssh.enabled.Value = $true
+            $ovf_config.Common.guestinfo.cis.appliance.net.ntp.Value = $ntp
+            $ovf_config.NetworkMapping.VM_Network.Value = $network
+            if (-not $DHCP) {
+                $ovf_config.net.address.Value = $IPAddress
+                $ovf_config.net.gateway.Value = $Gateway
+                $ovf_config.net.dnsServers.Value = $DNS -join ','
+                $ovf_config.net.searchDomains.Value = $Domains -join ','
+                $ovf_config.net.hostname.Value = $hostname
             }
+            $vmhost = Get-Cluster -Name $Cluster | Get-VMHost | Where-Object { $_.ConnectionState -eq 'Connected' } | Get-Random -Count 1
+            Write-log -message "Deploying VM with name: '$Name'." -LogPrefix $LogPrefix
+            Test-IPAddress -IPAddress $IPAddress
+            $VM = Import-VApp -Source $script:ova_file -Name $Name -Datastore $Datastore -VMHost $vmhost -DiskStorageFormat Thin `
+                -OvfConfiguration $ovf_config -InventoryLocation $InventoryLocation
         }
-        if ($null -eq $script:ova_file){
-            $script:ova_file = Get-VCDAOva -Datastore $Datastore -OVAFilename $OVAFilename
+        if ($vm.PowerState -ne 'PoweredOn') {
+            $spec = New-Object VMware.Vim.VirtualMachineConfigSpec
+            $spec.vAppConfig = New-Object VMware.Vim.VmConfigSpec
+            $property_spec = New-Object VMware.Vim.VAppPropertySpec
+            $property_spec.Operation = "edit"
+            $property_spec.Info = New-Object VMware.Vim.VAppPropertyInfo
+            $property_spec.Info = $vm.ExtensionData.Config.VAppConfig.Property | Where-Object { $_.id -eq "guestinfo.cis.appliance.is.public.cloud" }
+            $property_spec.Info.DefaultValue = $true
+            $spec.VAppConfig.Property = $property_spec
+            $vm.ExtensionData.ReconfigVM($spec)
+            Write-Log -message "Power on VM with name: '$($vm.name)'." -LogPrefix $LogPrefix
+            return Start-VM -VM $vm
         }
-        $ovf_config = Get-OvfConfiguration -Ovf $script:ova_file
-        $ovf_config.DeploymentOption.Value = $DeploymentOption
-        $ovf_config.Common.guestinfo.cis.appliance.root.password.Value = ($password | ConvertFrom-SecureString -AsPlainText)
-        $ovf_config.Common.guestinfo.cis.appliance.ssh.enabled.Value = $true
-        $ovf_config.Common.guestinfo.cis.appliance.net.ntp.Value = $ntp
-        $ovf_config.NetworkMapping.VM_Network.Value = $network
-        if (-not $DHCP) {
-            $ovf_config.net.address.Value = $IPAddress
-            $ovf_config.net.gateway.Value = $Gateway
-            $ovf_config.net.dnsServers.Value = $DNS -join ','
-            $ovf_config.net.searchDomains.Value = $Domains -join ','
-            $ovf_config.net.hostname.Value = $hostname
+        else {
+            return $vm
         }
-        $vmhost = Get-Cluster -Name $Cluster | Get-VMHost | Where-Object { $_.ConnectionState -eq 'Connected' } | Get-Random -Count 1
-        Write-log -message "Deploying VM '$Name'"
-        Test-IPAddress -IPAddress $IPAddress
-        $VM = Import-VApp -Source $script:ova_file -Name $Name -Datastore $Datastore -VMHost $vmhost -DiskStorageFormat Thin `
-            -OvfConfiguration $ovf_config -InventoryLocation $InventoryLocation
-        Write-Log -message "Power on VM '$($vm.name)'."
-        return Start-VM -VM $vm
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

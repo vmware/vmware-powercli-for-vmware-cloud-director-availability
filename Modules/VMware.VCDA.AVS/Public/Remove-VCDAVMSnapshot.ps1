@@ -28,7 +28,7 @@ function Remove-VCDAVMSnapshot {
         Remove-VCDAVMSnapshot -VMName "VCDA-AVS-Tunnel-01" -id "VirtualMachineSnapshot-snapshot-1032"
         Will remove snapshot with id "VirtualMachineSnapshot-snapshot-1032" from VCDA VM "VCDA-AVS-Tunnel-01"
     #>
-    [AVSAttribute(30, UpdatesSDDC = $false)]
+    [AVSAttribute(180, UpdatesSDDC = $false)]
     [CmdletBinding()]
     param (
         [Parameter(
@@ -52,7 +52,7 @@ function Remove-VCDAVMSnapshot {
         [Parameter(
             Mandatory = $false,
             HelpMessage = "Confirm that snapshots of the VCDA VMs will be deleted."
-            )]
+        )]
         [ValidateNotNullOrEmpty()]
         [switch]
         $Confirm
@@ -64,23 +64,27 @@ function Remove-VCDAVMSnapshot {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         $VCDA_VMs = Get-VCDAVM -VMName $PSBoundParameters.VMName
+        if ($VCDA_VMs.count -eq 0) {
+            Write-Log -message "No VCDA VMs found."
+            return
+        }
         $PSBoundParameters.Remove('VMName') | Out-Null
         $PSBoundParameters.Remove('Confirm') | Out-Null
 
         $snapshot = $VCDA_VMs | Get-Snapshot @PSBoundParameters
-        if ($null -ne $snapshot){
+        if ($null -ne $snapshot) {
             if ($Confirm -ne $true) {
                 Write-Log -message "The following snapshots will be deleted, to proceed please run again and select 'confirm':
-                $($snapshot | Select-Object vm, name, Id, Created, PowerState, Quiesced, SizeGB | Format-Table -AutoSize | Out-String)"
-                Write-Error 'You must accept that VCDA VM snapshots will be deleted.'
+                $($snapshot | Select-Object vm, name, Id, Created, PowerState,  @{N = "Quiesced"; E = { $_.ExtensionData.Quiesced } }, SizeGB | Format-Table -AutoSize | Out-String)"
+                Write-Error 'You must confirm that VCDA VM snapshots will be deleted.'
             }
             else {
-            Write-Log -message "Removing following snapshots:
-            $($snapshot | Select-Object vm, name, Id, Created, PowerState, Quiesced, SizeGB | Format-Table -AutoSize | Out-String)"
-            $snapshot | Remove-Snapshot -Confirm:$false
+                Write-Log -message "Removing following snapshots:
+            $($snapshot | Select-Object vm, name, Id, Created, PowerState,  @{N = "Quiesced"; E = { $_.ExtensionData.Quiesced } }, SizeGB | Format-Table -AutoSize | Out-String)"
+                $snapshot | Remove-Snapshot -Confirm:$false
             }
         }
-        if ($null -eq $snapshot){
+        if ($null -eq $snapshot) {
             Write-Log -message "No snapshots found."
         }
     }

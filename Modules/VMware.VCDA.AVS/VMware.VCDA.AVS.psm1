@@ -1,4 +1,3 @@
-using module Microsoft.AVS.Management
 <#
 Copyright 2023 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause
@@ -34,8 +33,7 @@ $Script:vcda_avs_params = [ordered]@{
     'ova'     = @{
         'vcda_ova_sha256' = @{
             #list of the supported VCDA version, sha256 of the provided OVA should match or deployment will fail.
-            '4.6'   = 'dde22a058c367360fec0c2d79b31d4ffb13d41a61e6a376d107ea89a1e6ee348' #build 21891963
-            '4.6.1' = 'ced17c2c6326a207ce7ac926990c679a8a66da455fa192c061c40d794aa255a7' #build 22347688
+            '4.7.0' = 'b84cd7ec170cec17bcd002c7471b28b457319b2260fdc7608e8fcae244809289' #build 22817906
         }
     }
 }

@@ -27,6 +27,10 @@ function Repair-LookupService {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         $vcda_vms = Get-VCDAVM -vmname $VMName
+        if ($vcda_vms.count -eq 0){
+            Write-log -message "No VCDA VMs found, cannot proceed with repair of lookup service."
+            return
+        }
         ($lookup_service = New-Object System.UriBuilder $Global:DefaultVIServer.ServiceUri).Path = '/lookupservice/sdk'
         $lookup_service_sha = Get-RemoteCert -url $lookup_service.Uri.AbsoluteUri -type sha256
         foreach ($VM in $vcda_vms) {

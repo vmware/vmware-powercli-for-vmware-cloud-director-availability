@@ -6,7 +6,12 @@ function Write-Log {
     param (
     [Parameter(Mandatory = $true)]
     [string]
-    $message
+    $message,
+    [Parameter(Mandatory = $false)]
+    [string]
+    $LogPrefix
     )
-    Write-Host "$(get-date -format "dd-MM-yyyy-HH:mm:ss K"): $message"
+    if ($LogPrefix){
+        $message = $LogPrefix + ": " + $message}
+    Write-Host "$(get-date -format "HH:mm:ss"): $message"
 }

@@ -102,6 +102,7 @@ function Install-VCDAAVS {
             Mandatory = $true,
             HelpMessage = 'Valid License key for VMware Cloud Director Availability')]
         [ValidateNotNullOrEmpty()]
+        [ValidatePattern('^\S{5}-\S{5}-\S{5}-\S{5}-\S{5}\b', ErrorMessage = "'{0}' is not in a valid format. Expected format is: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX")]
         [string]
         $License,
 
@@ -115,14 +116,16 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'VCDA Public Service Endpoint address, "https://VCDA-FQDN:443"')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [system.uri]::IsWellFormedUriString($_, 'Absolute') -and ([system.uri]$_).Scheme -eq 'https' }, `
+                ErrorMessage = "'{0}' is not a valid Public Endpoint address, it must be in the format 'https://VCDA-FQDN:443'")]
         [string]
         $PublicApiEndpoint,
 
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'VMware Cloud Director endpoint URL, "https://VMware-Cloud-Director-IP-Address:443/api"')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [system.uri]::IsWellFormedUriString($_, 'Absolute') -and ([system.uri]$_).Scheme -eq 'https' }, `
+                ErrorMessage = "'{0}' is not a valid Public Endpoint address, it must be in the format 'https://VMware-Cloud-Director-IP-Address:443/api'")]
         [string]
         $VCDApiEndpoint,
 
@@ -142,14 +145,14 @@ function Install-VCDAAVS {
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'Datastore to be used for deployment of the appliances')]
+            HelpMessage = 'Name of the Datastore to be used for deployment of the appliances')]
         [ValidateNotNullOrEmpty()]
         [string]
         $Datastore,
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'Destination vSphere Cluster to be used for deployment of the appliances')]
+            HelpMessage = 'Name of the Destination vSphere Cluster to be used for deployment of the appliances')]
         [ValidateNotNullOrEmpty()]
         [string]
         $Cluster,
@@ -157,14 +160,17 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'IPv4 address in CIDR notation (for example 192.168.0.222/24) to be used for deployment of the Manager appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                [System.Net.IPAddress]($_.split("/")[0]) -and 0..32 -contains $_.Split("/")[1]
+            }, ErrorMessage = "'{0}' is not valid format, IPv4 address in CIDR notation (for example 192.168.0.222/24)"
+        )]
         [string]
         $ManagerIPAddress,
 
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Gateway IP address for the Manager Appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [System.Net.IPAddress]($_) })]
         [string]
         $ManagerGW,
 
@@ -184,14 +190,17 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'IPv4 address in CIDR notation (for example 192.168.0.223/24) to be used for deployment of the Tunnel appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                [System.Net.IPAddress]($_.split("/")[0]) -and 0..32 -contains $_.Split("/")[1]
+            }, ErrorMessage = "'{0}' is not valid format, IPv4 address in CIDR notation (for example 192.168.0.223/24)"
+        )]
         [string]
         $TunnelIPAddress,
 
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Gateway IP address for the Tunnel Appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [System.Net.IPAddress]($_) })]
         [string]
         $TunnelGW,
 
@@ -212,7 +221,10 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'IPv4 address in CIDR notation (for example 192.168.0.224/24) to be used for deployment of the First (1st) Replicator appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                [System.Net.IPAddress]($_.split("/")[0]) -and 0..32 -contains $_.Split("/")[1]
+            }, ErrorMessage = "'{0}' is not valid format, IPv4 address in CIDR notation (for example 192.168.0.224/24)"
+        )]
         [string]
         $Replicator1IPAddress,
 
@@ -226,7 +238,10 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'IPv4 address in CIDR notation (for example 192.168.0.225/24) to be used for deployment of the Second (2nd) Replicator appliance')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                [System.Net.IPAddress]($_.split("/")[0]) -and 0..32 -contains $_.Split("/")[1]
+            }, ErrorMessage = "'{0}' is not valid format, IPv4 address in CIDR notation (for example 192.168.0.225/24)"
+        )]
         [string]
         $Replicator2IPAddress,
 
@@ -240,7 +255,7 @@ function Install-VCDAAVS {
         [Parameter(
             Mandatory = $true,
             HelpMessage = 'Gateway IP address for 1st and 2nd Replicator appliances')]
-        [ValidateNotNullOrEmpty()]
+        [ValidateScript({ [System.Net.IPAddress]($_) })]
         [string]
         $ReplicatorGW,
 
@@ -287,7 +302,6 @@ function Install-VCDAAVS {
     )
 
     try {
-        Write-Log -message "Starting 'Deploy-VCDA-AVS'"
         #make sure vc connection is healthy, script will fail if not
         if ($null -eq ((Get-View SessionManager -Server $global:DefaultVIServer).CurrentSession)) {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
@@ -295,9 +309,8 @@ function Install-VCDAAVS {
         if ($AcceptEULA -ne $true) {
             Write-Error 'You must accept the End User License Agreement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
         }
-        #Prepare the SDDC
-        Initialize-AVSSite
-
+        #make sure SDDC is prepared
+        Get-AVSSiteStatus -LogPrefix "[PRE-CHECK]"
         #get folder
         $vm_folder = Get-Folder -Name $Script:vcda_avs_params.vsphere.folder -Type VM -Location ([AVSSecureFolder]::root())
         $LocalVarCommonParams = @{
@@ -337,49 +350,73 @@ function Install-VCDAAVS {
 
         #1 deploy manager
         $man_vm_name = 'VCDA-AVS-Manager-01'
+        Write-Log -message "Starting Manager installation, VM name is '$man_vm_name'." -LogPrefix "[DEPLOY-MANAGER]"
         $man_pass = Get-VCDAVMPassword -name $man_vm_name
         $manager_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarManagerParams -DeploymentOption cloud -Name $man_vm_name `
-            -network $ManagerNetwork -password $man_pass.old
+            -network $ManagerNetwork -password $man_pass.old -LogPrefix "[DEPLOY-MANAGER]"
         [avSSecureFolder]::Secure($vm_folder)
         #$manager_vm | Add-VCDATag
 
         #2 deploy tunnel
         $tun_vm_name = 'VCDA-AVS-Tunnel-01'
+        Write-Log -message "Starting Tunnel installation, VM name is '$tun_vm_name'." -LogPrefix "[DEPLOY-TUNNEL]"
         $tun_pass = Get-VCDAVMPassword -name $tun_vm_name
         $tunnel_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarTunnelParams -DeploymentOption tunnel -Name $tun_vm_name `
-            -network $TunnelNetwork -password $tun_pass.old
+            -network $TunnelNetwork -password $tun_pass.old -LogPrefix "[DEPLOY-TUNNEL]"
         [avSSecureFolder]::Secure($vm_folder)
         #$tunnel_vm | Add-VCDATag
 
         #3 deploy replicator 1
         $repl1_vm_name = 'VCDA-AVS-Replicator-01'
+        Write-Log -message "Starting 1st replicator installation, VM name is '$repl1_vm_name'." -LogPrefix "[DEPLOY-REPLICATOR-1]"
         $repl1_pass = Get-VCDAVMPassword -name $repl1_vm_name
         $repl1_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarRepl01Params -DeploymentOption replicator -Name $repl1_vm_name `
-            -network $ReplicatorNetwork -password $repl1_pass.old
+            -network $ReplicatorNetwork -password $repl1_pass.old -LogPrefix "[DEPLOY-REPLICATOR-1]"
         [avSSecureFolder]::Secure($vm_folder)
         #$repl1_vm | Add-VCDATag
 
         #4 deploy replicator 2
         $repl2_vm_name = 'VCDA-AVS-Replicator-02'
+        Write-Log -message "Starting 2nd replicator installation, VM name is '$repl2_vm_name'." -LogPrefix "[DEPLOY-REPLICATOR-2]"
         $repl2_pass = Get-VCDAVMPassword -name $repl2_vm_name
         $repl2_vm = Deploy-VCDAOVA @LocalVarCommonParams @LocalvarRepl02Params -DeploymentOption replicator -Name $repl2_vm_name `
-            -network $ReplicatorNetwork -password $repl2_pass.old
+            -network $ReplicatorNetwork -password $repl2_pass.old -LogPrefix "[DEPLOY-REPLICATOR-2]"
         [avSSecureFolder]::Secure($vm_folder)
         #$repl2_vm | Add-VCDATag
+        Write-Log -message "All VCDA VMs deployed successfully." -LogPrefix "[DEPLOY-COMPLETED]"
 
+        Write-Log -message "Starting Manager configuration, VM name is '$man_vm_name'." -LogPrefix "[CONFIG-MANAGER]"
         Initialize-VCDAAppliance -VCDA_VM $manager_vm -LicenseKey $license -SiteName $SiteName -PublicApiEndpoint $PublicApiEndpoint -vcd_api_endpoint $VCDApiEndpoint `
-            -vcd_user $VCDUser -vcd_password $VCDPassword -IPAddress $LocalvarManagerParams.IPAddress
+            -vcd_user $VCDUser -vcd_password $VCDPassword -IPAddress $LocalvarManagerParams.IPAddress -LogPrefix "[CONFIG-MANAGER]"
 
-        Initialize-VCDAAppliance -VCDA_VM $tunnel_vm -IPAddress $LocalvarTunnelParams.IPAddress
+        Initialize-VCDAAppliance -VCDA_VM $tunnel_vm -IPAddress $LocalvarTunnelParams.IPAddress -LogPrefix "[CONFIG-TUNNEL]"
 
-        Initialize-VCDAAppliance -VCDA_VM $repl1_vm -IPAddress $LocalvarRepl01Params.IPAddress
-        Initialize-VCDAAppliance -VCDA_VM $repl2_vm -IPAddress $LocalvarRepl02Params.IPAddress
+        Initialize-VCDAAppliance -VCDA_VM $repl1_vm -IPAddress $LocalvarRepl01Params.IPAddress -LogPrefix "[CONFIG-REPLICATOR-1]"
+        Initialize-VCDAAppliance -VCDA_VM $repl2_vm -IPAddress $LocalvarRepl02Params.IPAddress -LogPrefix "[CONFIG-REPLICATOR-2]"
+        Write-Log -message "All VCDA Appliances Configured Successfully." -LogPrefix "[CONFIG-COMPLETED]"
 
+        Register-Replicators -VCDA_Manager_VM $manager_vm -VCDA_replicator_VM $repl1_vm -LogPrefix "[REGISTER-REPLICATOR-1]"
+        Register-Replicators -VCDA_Manager_VM $manager_vm -VCDA_replicator_VM $repl2_vm -LogPrefix "[REGISTER-REPLICATOR-2]"
 
-        Register-Replicators -VCDA_Manager_VM $manager_vm -VCDA_replicator_VM $repl1_vm
-        Register-Replicators -VCDA_Manager_VM $manager_vm -VCDA_replicator_VM $repl2_vm
+        Register-Tunnel -VCDA_Manager_VM $manager_vm -VCDA_tunnel_vm $tunnel_vm -LogPrefix "[REGISTER-TUNNEL]"
 
-        Register-Tunnel -VCDA_Manager_VM $manager_vm -VCDA_tunnel_vm $tunnel_vm
+        $details = @()
+        $details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "CLOUD" } }, `
+        @{N = "Address"; E = { "https://" + $($manager_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
+        $details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "MANAGER" } }, `
+        @{N = "Address"; E = { "https://" + $($manager_vm.ExtensionData.guest.IpAddress) + ":8441/ui/admin" } }
+        $details += "" | Select-Object @{N = "VM Name"; E = { $tun_vm_name } }, @{N = "Service"; E = { "TUNNEL" } }, `
+        @{N = "Address"; E = { "https://" + $($tunnel_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
+        $details += "" | Select-Object @{N = "VM Name"; E = { $repl1_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
+        @{N = "Address"; E = { "https://" + $($repl1_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
+        $details += "" | Select-Object @{N = "VM Name"; E = { $repl2_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
+        @{N = "Address"; E = { "https://" + $($repl2_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
+
+        Write-Host "To access the VCDA appliances use SSO Authentication with 'cloudadmin' credentials."
+        Write-Host ($details | Format-Table -AutoSize -Wrap | Out-String)
+
+        Write-Log -message "Installation of VMware Cloud Director Availability completed successfully."
+        Write-Output "Installation of VMware Cloud Director Availability completed successfully."
 
     }
     catch {

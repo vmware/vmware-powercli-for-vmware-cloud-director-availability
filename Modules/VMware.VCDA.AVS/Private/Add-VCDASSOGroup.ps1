@@ -27,8 +27,8 @@ function Add-VCDASSOGroup {
     )
 
     try {
-        $username = Get-SsoPersonUser -Name $user -Domain $Domain
-        $group = Get-SsoGroup -Domain $Domain -Name $Name
+        $username = Get-SsoPersonUser -Name $user -Domain $Domain | Where-Object {$_.name -eq $user}
+        $group = Get-SsoGroup -Domain $Domain -Name $Name | Where-Object {$_.name -eq $Name}
         #create group if it doesn't exists
         if ($null -eq $group) {
             Write-Log -message "Creating SSO Admin group '$name'"

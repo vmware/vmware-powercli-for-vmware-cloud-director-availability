@@ -37,6 +37,7 @@ function Get-RemoteCert {
             }
         }
         catch {
+            Write-Log "Failed to get a certificate from remote address: '$url'." -LogPrefix "[ERROR]"
             $PSCmdlet.ThrowTerminatingError($_)
         }
     }
