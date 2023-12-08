@@ -9,6 +9,8 @@ function Install-VCDAReplicator {
     Install and configure new VCDA Replicator virtual machine in AVS environment.
 .DESCRIPTION
     Install and configure new VCDA Replicator virtual machine in AVS environment.
+    When installing additional replicator you must use one of the predefined VM name:
+    "VCDA-AVS-Replicator-03", "VCDA-AVS-Replicator-04", "VCDA-AVS-Replicator-05", "VCDA-AVS-Replicator-06"
 .PARAMETER Datastore
     Datastore to be used for deployment of the appliance
 .PARAMETER Cluster
@@ -20,7 +22,7 @@ function Install-VCDAReplicator {
 .PARAMETER ReplicatorGW
     Gateway IP address for the Replicator appliance
 .PARAMETER ReplicatorNetwork
-    vSphere network to be used for deployment of the Replicator appliance
+    Name of the vSphere network to be used for deployment of the Replicator appliance
 .PARAMETER NTPServer
     NTP Server address to be used by the Replicator appliance
 .PARAMETER DNSServer
@@ -28,15 +30,15 @@ function Install-VCDAReplicator {
 .PARAMETER SearchDomain
     List of search domain for all appliances (for example: "domain1.local,domain2.local")
 .PARAMETER OVAFilename
-    Name of the VCDA .ova file, located in top folder of the same Datastore where appliance will be deployed (for example: "VCDA-4.6.1.ova")
+    Name of the VCDA .ova file, located in top folder of the same Datastore where appliance will be deployed (for example: "VCDA-4.7.ova")
 .PARAMETER VMName
     Name of the replicator VM, must match the predefined VM Names.
-    ("VCDA_AVS_Replicator_03", "VCDA_AVS_Replicator_04", "VCDA_AVS_Replicator_05", "VCDA_AVS_Replicator_06")
+    ("VCDA-AVS-Replicator-03", "VCDA-AVS-Replicator-04", "VCDA-AVS-Replicator-05", "VCDA-AVS-Replicator-06")
 .PARAMETER AcceptEULA
     Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
 .EXAMPLE
     $params = @{
-        'VMName'              = 'VCDA_AVS_Replicator_03'
+        'VMName'              = 'VCDA-AVS-Replicator-03'
         'Datastore'           = 'Datastore01'
         'Cluster'             = 'Cluster01'
         'ReplicatorIPAddress' = '192.168.0.226/24'

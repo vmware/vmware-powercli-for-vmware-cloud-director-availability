@@ -6,9 +6,12 @@ SPDX-License-Identifier: BSD-2-Clause
 function Remove-VCDAVMSnapshot {
     <#
     .SYNOPSIS
-        Remove a VM Snapshot of VCDA Virtual machine
+        Remove a VM Snapshot of VCDA Virtual machine.
     .DESCRIPTION
-        Remove a VM Snapshot of VCDA Virtual machine, to get list of snapshots run "Get-VCDAReport"
+        Remove a VM Snapshot of VCDA Virtual machine, to get list of snapshots run "Get-VCDAReport".
+        By default all snapshots from all VMs will be deleted.
+        You can filter which snapshots will be removed ny using a combination of different parameter.
+        Running the command without 'Confirm' parameter will list snapshot that will be deleted but will not delete them.
     .PARAMETER VMName
         Name of the VCDA Virtual Machine
     .PARAMETER Name

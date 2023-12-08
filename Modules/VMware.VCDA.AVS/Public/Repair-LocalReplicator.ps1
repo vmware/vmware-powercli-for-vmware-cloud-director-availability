@@ -8,6 +8,8 @@ function Repair-LocalReplicator {
         Repair all local VCDA replicator VMs in the cloud site with manager services.
     .DESCRIPTION
         Repair all local VCDA replicator VMs in the cloud site with manager services.
+        By default all replicators are repaired, use 'VMName' parameter to repair specific replicator.
+        Use this when service account password is changed or replicator certificate is renewed.
         The script will not repair any remote replicators.
     .EXAMPLE
         Repair-LocalReplicator

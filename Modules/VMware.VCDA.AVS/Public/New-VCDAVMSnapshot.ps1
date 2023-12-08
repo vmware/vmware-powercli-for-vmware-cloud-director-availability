@@ -6,9 +6,11 @@ SPDX-License-Identifier: BSD-2-Clause
 function New-VCDAVMSnapshot {
     <#
     .SYNOPSIS
-        Create a VM Snapshot of VCDA Virtual machine
+        Create a VM Snapshot of VCDA Virtual machine.
     .DESCRIPTION
-        Create a VM Snapshot of VCDA Virtual machine
+        Create a VM Snapshot of VCDA Virtual machine.
+        If no VMName is provided it will take snapshots of all VCDA VMs.
+        There is a limit of 2 snapshots, if a VM already have 2 snapshots no new snapshots will be created.
     .PARAMETER VMName
         Name of the VCDA Virtual Machine to snapshot.
     .PARAMETER Name

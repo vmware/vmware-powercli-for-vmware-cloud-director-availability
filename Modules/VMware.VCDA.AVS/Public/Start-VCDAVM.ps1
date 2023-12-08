@@ -9,7 +9,7 @@ function Start-VCDAVM {
         Power On all or given VCDA virtual machine in AVS environment.
     .DESCRIPTION
         Power On all or given VCDA virtual machine in AVS environment.
-        By default all virtual machines that are not in 'PoweredOn' state will be powered on.
+        By default all virtual machines that are not in 'PoweredOn' state will be powered on, to Power On specific VM use 'VMName' parameter.
     .PARAMETER VMName
         Name of the VCDA Virtual Machine to Power On.
     .EXAMPLE

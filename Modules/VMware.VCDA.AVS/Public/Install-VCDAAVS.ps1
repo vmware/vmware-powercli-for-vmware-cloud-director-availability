@@ -6,25 +6,29 @@ SPDX-License-Identifier: BSD-2-Clause
 function Install-VCDAAVS {
     <#
 .SYNOPSIS
-   Install and configure VMware Cloud Director Availability instance in AVS.
+   Install and configure VMware Cloud Director Availability instance in AVS
 .DESCRIPTION
     Install and configure VMware Cloud Director Availability instance in AVS.
+    Before running the install AVS site must be prepared by running 'Initialize-AVSSite' command.
+    This command will Install a VCDA instance of a Manager, Tunnel and 2 Replicator appliances.
+    You must Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
+
 .PARAMETER License
-    Valid License key for VMware Cloud Director Availability.
+    Valid License key for VMware Cloud Director Availability
 .PARAMETER SiteName
-    Name of the VCDA site, cannot be changed after installation. Only latin alphanumerical characters and "-"  are allowed in site name.
+    Name of the VCDA site, cannot be changed after installation. Only latin alphanumerical characters and "-"  are allowed in site name
 .PARAMETER PublicApiEndpoint
-    VCDA Public Service Endpoint address, "https://VCDA-FQDN:443".
+    VCDA Public Service Endpoint address, "https://VCDA-FQDN:443"
 .PARAMETER VCDApiEndpoint
-    VMware Cloud Director endpoint URL, "https://VMware-Cloud-Director-IP-Address:443/api".
+    VMware Cloud Director Service endpoint URL, "https://VMware-Cloud-Director-IP-Address:443/api"
 .PARAMETER VCDUser
-    Username of a System administrator user in VMware Cloud Director. For example, use administrator@system'.
+    Username of a System administrator user in VMware Cloud Director Service. For example, use administrator@system'
 .PARAMETER VCDPassword
-    Password of the VMware Cloud Director System administrator user.
+    Password of the VMware Cloud Director Service System administrator user
 .PARAMETER Datastore
-    Datastore to be used for deployment of the appliances
+    Name of the Datastore to be used for deployment of the appliances. The ova file must be available in the same Datastore
 .PARAMETER Cluster
-    Destination vSphere Cluster to be used for deployment of the appliances
+    Name of the Destination vSphere Cluster to be used for deployment of the appliances
 .PARAMETER ManagerIPAddress
     IPv4 address in CIDR notation (for example 192.168.0.222/24) to be used for deployment of the Manager appliance
 .PARAMETER ManagerGW
@@ -32,15 +36,15 @@ function Install-VCDAAVS {
 .PARAMETER ManagerHostname
     Hostname of the Manager appliance
 .PARAMETER ManagerNetwork
-    vSphere network to be used for deployment of the Manager appliance
+    Name of the vSphere network to be used for deployment of the Manager appliance
 .PARAMETER TunnelIPAddress
-    IPv4 address in CIDR notation (for example 192.168.0.223/24) to be used for deployment of the Tunnel appliance
+    IPv4 address in CIDR notation (for example 192.168.0.223/24) to be used for deployment of the Tunnel appliance.
 .PARAMETER TunnelGW
     Gateway IP address for the Tunnel Appliance
 .PARAMETER TunnelHostname
     Hostname of the Tunnel appliance
 .PARAMETER TunnelNetwork
-    vSphere network to be used for deployment of the Tunnel appliance
+    Name of the vSphere network to be used for deployment of the Tunnel appliance
 .PARAMETER Replicator1IPAddress
     IPv4 address in CIDR notation (for example 192.168.0.224/24) to be used for deployment of the First (1st) Replicator appliance
 .PARAMETER Replicator1Hostname
@@ -52,7 +56,7 @@ function Install-VCDAAVS {
 .PARAMETER ReplicatorGW
     Gateway IP address for 1st and 2nd Replicator appliances
 .PARAMETER ReplicatorNetwork
-    vSphere network to be used for deployment of 1st and 2nd Replicator appliances
+    Name of the vSphere network to be used for deployment of 1st and 2nd Replicator appliances
 .PARAMETER NTPServer
     NTP Server address to be used for all VCDA appliances
 .PARAMETER DNSServer
@@ -60,12 +64,12 @@ function Install-VCDAAVS {
 .PARAMETER SearchDomain
     List of search domain for all appliances (for example: "domain1.local,domain2.local")
 .PARAMETER OVAFilename
-    Name of the VCDA .ova file, located in top folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.6.1.ova")
+    Name of the VCDA .ova file, located in a folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.7.ova")
 .PARAMETER AcceptEULA
     Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
 .EXAMPLE
     $params = @{
-        'License'              = 'XXXX-XXXX-XXXX-XXXX-XXXX'
+        'License'              = 'XXXX-XXXX-XXXX-XXXX-XXXX' | ConvertTo-SecureString -AsPlainText -Force
         'SiteName'             = 'vcda-demo'
         'PublicApiEndpoint'    = 'https://VCDA-FQDN:443'
         'VCDApiEndpoint'       = "https://VMware-Cloud-Director-IP-Address:443/api"
@@ -102,8 +106,9 @@ function Install-VCDAAVS {
             Mandatory = $true,
             HelpMessage = 'Valid License key for VMware Cloud Director Availability')]
         [ValidateNotNullOrEmpty()]
-        [ValidatePattern('^\S{5}-\S{5}-\S{5}-\S{5}-\S{5}\b', ErrorMessage = "'{0}' is not in a valid format. Expected format is: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX")]
-        [string]
+        [ValidateScript({ ($_ | ConvertFrom-SecureString -AsPlainText) -match '^\S{5}-\S{5}-\S{5}-\S{5}-\S{5}\b$' }, `
+                ErrorMessage = "The provided License is not in a valid format. Expected format is: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX")]
+        [SecureString]
         $License,
 
         [Parameter(
@@ -123,7 +128,7 @@ function Install-VCDAAVS {
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'VMware Cloud Director endpoint URL, "https://VMware-Cloud-Director-IP-Address:443/api"')]
+            HelpMessage = 'VMware Cloud Director Service endpoint URL, "https://VMware-Cloud-Director-IP-Address:443/api"')]
         [ValidateScript({ [system.uri]::IsWellFormedUriString($_, 'Absolute') -and ([system.uri]$_).Scheme -eq 'https' }, `
                 ErrorMessage = "'{0}' is not a valid Public Endpoint address, it must be in the format 'https://VMware-Cloud-Director-IP-Address:443/api'")]
         [string]
@@ -289,7 +294,7 @@ function Install-VCDAAVS {
 
         [Parameter(
             Mandatory = $true,
-            HelpMessage = 'Named of the VCDA .ova file, located in top folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.6.1.ova")')]
+            HelpMessage = 'Named of the VCDA .ova file, located in a folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.7.ova")')]
         [ValidateNotNullOrEmpty()]
         [string]
         $OVAFilename,
@@ -386,7 +391,8 @@ function Install-VCDAAVS {
         Write-Log -message "All VCDA VMs deployed successfully." -LogPrefix "[DEPLOY-COMPLETED]"
 
         Write-Log -message "Starting Manager configuration, VM name is '$man_vm_name'." -LogPrefix "[CONFIG-MANAGER]"
-        Initialize-VCDAAppliance -VCDA_VM $manager_vm -LicenseKey $license -SiteName $SiteName -PublicApiEndpoint $PublicApiEndpoint -vcd_api_endpoint $VCDApiEndpoint `
+        Initialize-VCDAAppliance -VCDA_VM $manager_vm -LicenseKey ($license | ConvertFrom-SecureString -AsPlainText) `
+            -SiteName $SiteName -PublicApiEndpoint $PublicApiEndpoint -vcd_api_endpoint $VCDApiEndpoint `
             -vcd_user $VCDUser -vcd_password $VCDPassword -IPAddress $LocalvarManagerParams.IPAddress -LogPrefix "[CONFIG-MANAGER]"
 
         Initialize-VCDAAppliance -VCDA_VM $tunnel_vm -IPAddress $LocalvarTunnelParams.IPAddress -LogPrefix "[CONFIG-TUNNEL]"
@@ -400,24 +406,26 @@ function Install-VCDAAVS {
 
         Register-Tunnel -VCDA_Manager_VM $manager_vm -VCDA_tunnel_vm $tunnel_vm -LogPrefix "[REGISTER-TUNNEL]"
 
-        $details = @()
-        $details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "CLOUD" } }, `
+        $vms_details = @()
+        $vms_details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "CLOUD" } }, `
         @{N = "Address"; E = { "https://" + $($manager_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
-        $details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "MANAGER" } }, `
+        $vms_details += "" | Select-Object @{N = "VM Name"; E = { $man_vm_name } }, @{N = "Service"; E = { "MANAGER" } }, `
         @{N = "Address"; E = { "https://" + $($manager_vm.ExtensionData.guest.IpAddress) + ":8441/ui/admin" } }
-        $details += "" | Select-Object @{N = "VM Name"; E = { $tun_vm_name } }, @{N = "Service"; E = { "TUNNEL" } }, `
+        $vms_details += "" | Select-Object @{N = "VM Name"; E = { $tun_vm_name } }, @{N = "Service"; E = { "TUNNEL" } }, `
         @{N = "Address"; E = { "https://" + $($tunnel_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
-        $details += "" | Select-Object @{N = "VM Name"; E = { $repl1_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
+        $vms_details += "" | Select-Object @{N = "VM Name"; E = { $repl1_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
         @{N = "Address"; E = { "https://" + $($repl1_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
-        $details += "" | Select-Object @{N = "VM Name"; E = { $repl2_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
+        $vms_details += "" | Select-Object @{N = "VM Name"; E = { $repl2_vm_name } }, @{N = "Service"; E = { "REPLICATOR" } }, `
         @{N = "Address"; E = { "https://" + $($repl2_vm.ExtensionData.guest.IpAddress) + "/ui/admin" } }
 
-        Write-Host "To access the VCDA appliances use SSO Authentication with 'cloudadmin' credentials."
-        Write-Host ($details | Format-Table -AutoSize -Wrap | Out-String)
+        Write-Host `n "To access VMware Cloud Director Availability Public Endpoint use Cloud Director credentials.
+        Address: '$PublicApiEndpoint'"
+
+        Write-Host `n "To access the VCDA appliances admin UI use SSO authentication with 'cloudadmin' credentials."
+        Write-Host ($vms_details | Format-Table -AutoSize -Wrap | Out-String)
 
         Write-Log -message "Installation of VMware Cloud Director Availability completed successfully."
         Write-Output "Installation of VMware Cloud Director Availability completed successfully."
-
     }
     catch {
         $PSCmdlet.ThrowTerminatingError($_)

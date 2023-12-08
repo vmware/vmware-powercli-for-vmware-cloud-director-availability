@@ -8,6 +8,7 @@ function Repair-LookupService {
         Repair Lookup service
     .DESCRIPTION
         Repair Lookup service of all VCDA appliances, usually it's required once VC/Lookup service certificate or address is changed.
+        By default the lookup service on all VCDA VMs is repaired to repair single VM use 'VMName' parameter.
     .EXAMPLE
         Repair-LookupService
     #>
