@@ -1,3 +1,4 @@
+using module @{ ModuleName = 'Microsoft.AVS.Management'; RequiredVersion = '5.3.99' }
 <#
 Copyright 2023 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause

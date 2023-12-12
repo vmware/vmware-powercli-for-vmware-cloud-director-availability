@@ -7,6 +7,10 @@
 <img src="https://img.shields.io/badge/VMware-5391FE?style=for-the-badge&logo=VMware&logoColor=white">&nbsp;&nbsp;
 <img src="https://img.shields.io/badge/VCDA-5391FE?style=for-the-badge&logo=VMware&logoColor=white">
 
+## Modules
+[<img src="https://img.shields.io/powershellgallery/v/VMware.VCDA.AVS?style=for-the-badge&logo=powershell&logoColor=white&label=VMware.VCDA.AVS&color=blue">][PSG_AVS]&nbsp;&nbsp;
+<img src= "https://img.shields.io/powershellgallery/dt/vmware.vcda.avs?style=for-the-badge&logo=powershell&logoColor=white&color=blue">
+
 ## Overview
 This is the Powershell repository for [VMware Cloud Director Availability](https://www.vmware.com/products/cloud-director-availability.html).
 The repository is providing Scripts and Modules to work VCDA.
@@ -26,3 +30,4 @@ Copyright 2023 VMware, Inc.
 [//]: Links
 
 [license]: LICENSE
+[PSG_AVS]: https://www.powershellgallery.com/packages/VMware.VCDA.AVS/

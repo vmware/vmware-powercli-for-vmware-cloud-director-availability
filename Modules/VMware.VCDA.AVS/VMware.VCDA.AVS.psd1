@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause
     RootModule           = 'VMware.VCDA.AVS.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.0.8'
+    ModuleVersion        = '0.0.9'
 
     # Supported PSEditions
     CompatiblePSEditions = 'core'
@@ -55,7 +55,7 @@ SPDX-License-Identifier: BSD-2-Clause
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules      = @(@{ModuleName = 'Microsoft.AVS.Management'; RequiredVersion = '6.0.112'; })
+    RequiredModules      = @(@{ModuleName = 'Microsoft.AVS.Management'; RequiredVersion = '5.3.99'; })
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
