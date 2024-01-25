@@ -40,35 +40,50 @@ function Reset-VCDARootPassword {
         }
         $VCDA_VMs = Get-VCDAVM -VMName $PSBoundParameters.VMName
         foreach ($VM in $VCDA_VMs) {
-            $role = ($VM.ExtensionData.Config.VAppConfig.Property | Where-Object { $_.id -eq 'guestinfo.cis.appliance.role' }).DefaultValue
-            switch ($role) {
-                cloud {
-                    $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.cloud.certificate' }).value
-                }
-                tunnel {
-                    $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.tunnel.certificate' }).value
-                }
-                replicator {
-                    $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.replicator.certificate' }).value
-                }
-            }
-            $IP = $VM.guest.ExtensionData.IpAddress
-            if ($null -eq $IP){
-                Write-Log -message "$($vm.name): Can't find IP address of the VM, VM power state is: '$($vm.PowerState)'."
-                continue
-            }
-            $remote_cert = Get-RemoteCert -url ('https://' + $IP) -type string
-            if ($remote_cert -ne $service_cert) {
-                Write-Error "Certificates doesn't match."
-            }
-            $vm_passwords = (Get-VCDAVMPassword -name ($vm.Name))
-            $old_creds = New-Object System.Management.Automation.PSCredential("root", $vm_passwords.old)
-            $creds = New-Object System.Management.Automation.PSCredential("root", $vm_passwords.current)
-            $new_pass = Get-VCDARandomPassword -MinLength 12 -MaxLength 24 -MinNumericCount 2 -MinSpecialCharCount 2 `
-                -MinUppercaseCount 2 -MinLowercaseCount 2 -MaxIdenticalAdjacentCharacters 2
-            #reset root password if expiration date is within the next 30 days or if force option is used.
             try {
-                $vcda_server = Connect-VCDA -Server $ip -AuthType Local -Credentials $creds -SkipCertificateCheck -NotDefault
+                $role = ($VM.ExtensionData.Config.VAppConfig.Property | Where-Object { $_.id -eq 'guestinfo.cis.appliance.role' }).DefaultValue
+                switch ($role) {
+                    cloud {
+                        $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.cloud.certificate' }).value
+                    }
+                    tunnel {
+                        $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.tunnel.certificate' }).value
+                    }
+                    replicator {
+                        $service_cert = ($vm.ExtensionData.Config.ExtraConfig | Where-Object { $_.key -eq 'guestinfo.replicator.certificate' }).value
+                    }
+                }
+                $IP = $VM.guest.ExtensionData.IpAddress
+                if ($null -eq $IP) {
+                    Write-Log -message "$($vm.name): Can't find IP address of the VM, VM power state is: '$($vm.PowerState)'."
+                    continue
+                }
+                $remote_cert = Get-RemoteCert -url ('https://' + $IP) -type string
+                if ($remote_cert -ne $service_cert) {
+                    Write-Error "Certificates doesn't match."
+                }
+                $vm_passwords = (Get-VCDAVMPassword -name ($vm.Name))
+                $old_creds = New-Object System.Management.Automation.PSCredential("root", $vm_passwords.old)
+                $creds = New-Object System.Management.Automation.PSCredential("root", $vm_passwords.current)
+                $new_pass = Get-VCDARandomPassword -MinLength 12 -MaxLength 24 -MinNumericCount 2 -MinSpecialCharCount 2 `
+                    -MinUppercaseCount 2 -MinLowercaseCount 2 -MaxIdenticalAdjacentCharacters 2
+                #reset root password if expiration date is within the next 30 days or if force option is used.
+                try {
+                    $vcda_server = Connect-VCDA -Server $ip -AuthType Local -Credentials $creds -SkipCertificateCheck -NotDefault
+                }
+                catch {
+                    if ($_ -match "Unable to connect to VCDA Server '$ip'. The server returned the following: 'Authentication required.'") {
+                        Write-Log -message "Trying to connect to '$ip' using old credentials"
+                        $vcda_server = Connect-VCDA -Server $ip -AuthType Local -Credentials $old_creds -SkipCertificateCheck -NotDefault
+                        if ($vcda_server) {
+                            $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText)
+                            $vm_passwords = (Get-VCDAVMPassword -name ($vm.Name))
+                        }
+                    }
+                    else {
+                        Write-Error $_
+                    }
+                }
                 $password_status = Get-VCDAPassExp -Server $vcda_server
                 $password_exp_date = (get-date).AddSeconds($password_status.secondsUntilExpiration)
                 if ($password_exp_date.AddDays(-30) -lt (Get-Date) -or $force -eq $true) {
@@ -78,7 +93,7 @@ function Reset-VCDARootPassword {
                     #save_new password to persistentSecrets
                     $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = $new_pass
                     $pass = Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.current | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
-                    if ($pass -eq "Root Password Changed Successfully."){
+                    if ($pass -eq "Root Password Changed Successfully.") {
                         Write-log -message  "'$($vm.name)' ($IP): root password changed successfully."
                     }
                 }
@@ -86,35 +101,12 @@ function Reset-VCDARootPassword {
                     Write-Log -message "'$($vm.name)' ($IP): root password will expire on: $password_exp_date, use force option to reset the password anyway."
                 }
             }
-            #in case current password is not correct try login with old pass (in case previous run has failed and password was not change successfully)
-            #also update persistentSecrets current password to correct one.
             catch {
-                if ($_ -match "Unable to connect to VCDA Server '$ip'. The server returned the following: 'Authentication required.'") {
-                    $vcda_server = Connect-VCDA -Server $ip -AuthType Local -Credentials $old_creds -SkipCertificateCheck -NotDefault
-                    $password_status = Get-VCDAPassExp -Server $vcda_server
-                    $password_exp_date = (get-date).AddSeconds($password_status.secondsUntilExpiration)
-                    if ($password_exp_date.AddDays(-30) -lt (Get-Date) -or $force -eq $true) {
-                        Write-Log -message "'$($vm.name)' ($IP): Trying to set root password using current credentials."
-                        #set the current creds to the proper one
-                        $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = $new_pass
-                        $pass = Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText) -NewPassword $new_pass
-                        if ($pass -eq "Root Password Changed Successfully."){
-                            Write-log -message "'$($vm.name)' ($IP): root password changed successfully."
-                        }
-                    }
-                    else {
-                        $persistentSecrets[($vm.Name) + $Script:vcda_avs_params.vcda.current_password] = ($vm_passwords.old | ConvertFrom-SecureString -AsPlainText)
-                        #set current password to old password which is the correct one.
-                        Write-Log -message "'$($vm.name)' ($IP): root password will expire on: $password_exp_date, use force option to reset the password anyway."
-                    }
-                }
-                else {
-                    $PSCmdlet.ThrowTerminatingError($_)
-                }
+                Write-Error $_ -ErrorAction Continue
             }
         }
     }
     Catch {
-        $PSCmdlet.ThrowTerminatingError($_)
+        Write-Error $_ -ErrorAction Continue
     }
 }

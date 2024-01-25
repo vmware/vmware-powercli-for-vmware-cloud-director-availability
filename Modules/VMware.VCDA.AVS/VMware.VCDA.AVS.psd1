@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause
     RootModule           = 'VMware.VCDA.AVS.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.0.9'
+    ModuleVersion        = '1.0.0'
 
     # Supported PSEditions
     CompatiblePSEditions = 'core'
@@ -116,7 +116,7 @@ SPDX-License-Identifier: BSD-2-Clause
             # ReleaseNotes = ''
 
             # Prerelease string of this module
-            Prerelease = 'preview'
+            # Prerelease = ''
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update/save
             # RequireLicenseAcceptance = $false

@@ -11,8 +11,11 @@ function Repair-LocalReplicator {
         By default all replicators are repaired, use 'VMName' parameter to repair specific replicator.
         Use this when service account password is changed or replicator certificate is renewed.
         The script will not repair any remote replicators.
+    .PARAMETER VMName
+        Name of the VCDA Replicator Virtual Machine. "VCDA-AVS-Replicator-01", "VCDA-AVS-Replicator-02",
+        "VCDA-AVS-Replicator-03", "VCDA-AVS-Replicator-04", "VCDA-AVS-Replicator-05", "VCDA-AVS-Replicator-06"
     .EXAMPLE
-        Repair-LocalReplicator
+        Repair-LocalReplicator -vmname ""
     #>
     [AVSAttribute(30, UpdatesSDDC = $false)]
     [CmdletBinding()]

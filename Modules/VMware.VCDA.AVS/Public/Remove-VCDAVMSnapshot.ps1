@@ -10,14 +10,14 @@ function Remove-VCDAVMSnapshot {
     .DESCRIPTION
         Remove a VM Snapshot of VCDA Virtual machine, to get list of snapshots run "Get-VCDAReport".
         By default all snapshots from all VMs will be deleted.
-        You can filter which snapshots will be removed ny using a combination of different parameter.
+        You can filter which snapshots will be removed by using a combination of different parameters.
         Running the command without 'Confirm' parameter will list snapshot that will be deleted but will not delete them.
     .PARAMETER VMName
-        Name of the VCDA Virtual Machine
+        Name of the VCDA Virtual Machine.
     .PARAMETER Name
-        Name of the snapshots that you want to delete
+        Name of the snapshots that you want to delete.
     .PARAMETER Id
-        Id of the snapshots that you want to delete
+        Id of the snapshots that you want to delete.
     .PARAMETER Confirm
         Confirm that snapshots of the VCDA VMs will be deleted.
         Without the confirm option the command will list the snapshots that will be deleted but will not delete any snapshots.

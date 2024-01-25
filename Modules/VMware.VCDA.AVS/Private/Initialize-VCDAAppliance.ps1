@@ -142,7 +142,7 @@ function Initialize-VCDAAppliance {
 
             #set manager service lookup service
             $manager_server = Connect-VCDA -Server $ip -port 8441 -AuthType Local -Credentials $credentials -SkipCertificateCheck -NotDefault
-            Write-Log -message "Successfully connected to 'manager' service: '$($vcda_server.server)'." -LogPrefix $LogPrefix
+            Write-Log -message "Successfully connected to 'manager' service: '$($manager_server.server)'." -LogPrefix $LogPrefix
             Set-LookupService -Server $manager_server -url $lookup_service.Uri.AbsoluteUri | Out-Null
             Write-Log -message "Set lookup service of 'manager' service to: '$lookup_service'." -LogPrefix $LogPrefix
         }

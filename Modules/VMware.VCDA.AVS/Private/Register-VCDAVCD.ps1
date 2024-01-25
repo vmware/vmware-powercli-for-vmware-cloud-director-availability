@@ -31,7 +31,7 @@ function Register-VCDAVCD {
             if ($null -ne $server) {
                 $LocalvarServer = $server
             }
-            #if thumbpring is not provided try to get the thumbprint and use it, less secure but more simple way.
+            #if thumbprint is not provided try to get the thumbprint and use it, less secure but more simple way.
             if (-not $vcdThumbprint) {
                 $vcdThumbprint = (Get-VCDARemoteCert -Server $LocalvarServer -url $url -viaTunnel:$false).certificate.thumbPrint
             }

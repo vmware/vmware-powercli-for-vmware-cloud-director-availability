@@ -11,7 +11,7 @@ function Install-VCDAAVS {
     Install and configure VMware Cloud Director Availability instance in AVS.
     Before running the install AVS site must be prepared by running 'Initialize-AVSSite' command.
     This command will Install a VCDA instance of a Manager, Tunnel and 2 Replicator appliances.
-    You must Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
+    You must Accept the End User License Agreement: "https://raw.githubusercontent.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/main/Resources/EULA.txt"')]
 
 .PARAMETER License
     Valid License key for VMware Cloud Director Availability
@@ -66,7 +66,7 @@ function Install-VCDAAVS {
 .PARAMETER OVAFilename
     Name of the VCDA .ova file, located in a folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.7.ova")
 .PARAMETER AcceptEULA
-    Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"'
+    Accept the End User License Agreement: "https://raw.githubusercontent.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/main/Resources/EULA.txt"'
 .EXAMPLE
     $params = @{
         'License'              = 'XXXX-XXXX-XXXX-XXXX-XXXX' | ConvertTo-SecureString -AsPlainText -Force
@@ -300,7 +300,7 @@ function Install-VCDAAVS {
         $OVAFilename,
         [Parameter(
             Mandatory = $false,
-            HelpMessage = 'Accept the End User License Agreement: "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt"')]
+            HelpMessage = 'Accept the End User License Agreement: "https://raw.githubusercontent.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/main/Resources/EULA.txt"')]
         [ValidateNotNullOrEmpty()]
         [switch]
         $AcceptEULA
@@ -312,7 +312,7 @@ function Install-VCDAAVS {
             Write-Error "vCenter server '$($Global:defaultviserver.Name)' connection is not heathy."
         }
         if ($AcceptEULA -ne $true) {
-            Write-Error 'You must accept the End User License Agreement "https://github.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/blob/c1705a1cf78861e6d65236fc8d6ea6c89f17ec5f/Resources/EULA.txt" to install VCDA. '
+            Write-Error 'You must accept the End User License Agreement "https://raw.githubusercontent.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/main/Resources/EULA.txt" to install VCDA. '
         }
         #make sure SDDC is prepared
         Get-AVSSiteStatus -LogPrefix "[PRE-CHECK]"
@@ -421,10 +421,11 @@ function Install-VCDAAVS {
         Write-Host `n "To access VMware Cloud Director Availability Public Endpoint use Cloud Director credentials.
         Address: '$PublicApiEndpoint'"
 
+        Write-Log -message "Installation of VMware Cloud Director Availability completed successfully."
+
         Write-Host `n "To access the VCDA appliances admin UI use SSO authentication with 'cloudadmin' credentials."
         Write-Host ($vms_details | Format-Table -AutoSize -Wrap | Out-String)
 
-        Write-Log -message "Installation of VMware Cloud Director Availability completed successfully."
         Write-Output "Installation of VMware Cloud Director Availability completed successfully."
     }
     catch {
