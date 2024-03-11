@@ -32,6 +32,7 @@ function Add-VCDARole {
         "StorageProfile.View"
         "Resource.AssignVMToPool"
         "StorageViews.View"
+        "VirtualMachine.Config.ReloadFromPath"
         "VirtualMachine.Config.AddExistingDisk"
         "VirtualMachine.Config.Settings"
         "VirtualMachine.Config.RemoveDisk"
@@ -53,6 +54,7 @@ function Add-VCDARole {
         $vcda_role = Get-VIRole -Name $Name -ErrorAction SilentlyContinue
         if ($vcda_role) {
             Write-Log -message "Role '$name' already exists."
+            Set-VIRole -Role $Name -AddPrivilege $SDDCRole_Privileges -ErrorAction Stop
         }
         else {
             Write-Log -message "Creating new vCenter role '$name' with required Privileges."
