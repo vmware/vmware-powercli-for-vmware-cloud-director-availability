@@ -36,6 +36,7 @@ $Script:vcda_avs_params = [ordered]@{
             #list of the supported VCDA version, sha256 of the provided OVA should match or deployment will fail.
             '4.7.0' = 'b84cd7ec170cec17bcd002c7471b28b457319b2260fdc7608e8fcae244809289' #build 22817906
             '4.7.1' = '5295e2224f484fb714c9606fdeb0b68974123faa3843f83d0e5151262c2dc40e' #build 23265673
+            '4.7.2' = 'ffc98b42b53c80422c13e9856c56e2d24a961be499aa9e8770fc4bcefa976e2f' #build 24058656
         }
     }
 }
