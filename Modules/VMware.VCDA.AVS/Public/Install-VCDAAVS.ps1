@@ -65,6 +65,7 @@ function Install-VCDAAVS {
     List of search domain for all appliances (for example: "domain1.local,domain2.local")
 .PARAMETER OVAFilename
     Name of the VCDA .ova file, located in a folder of the same Datastore where appliances will be deployed (for example: "VCDA-4.7.ova")
+    Only 4.7.3 or 4.7.3.1 are supported versions.
 .PARAMETER AcceptEULA
     Accept the End User License Agreement: "https://raw.githubusercontent.com/vmware/vmware-powercli-for-vmware-cloud-director-availability/main/Resources/EULA.txt"'
 .EXAMPLE

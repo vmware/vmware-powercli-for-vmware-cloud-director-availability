@@ -82,7 +82,7 @@ function Initialize-VCDAAppliance {
         do {
             $boot_wait = $false
             try {
-                $wait_boot = Invoke-WebRequest -Uri ('https://'+$IP+'/docs/api-guide.html') -Method GET -SkipCertificateCheck -TimeoutSec 5
+                $wait_boot = Invoke-WebRequest -Uri ('https://' + $IP + '/docs/api-guide.html') -Method GET -SkipCertificateCheck -TimeoutSec 5
                 Start-Sleep -Seconds 1
             }
             catch {
@@ -118,8 +118,8 @@ function Initialize-VCDAAppliance {
                 $vcda_server = Connect-VCDA -Server $ip -AuthType Local -Credentials $temp_credentials -SkipCertificateCheck -NotDefault
                 Write-Log -message "'$($VCDA_VM.name)' ($IP): Trying to change root password." -LogPrefix $LogPrefix
                 $pass = Set-VCDAPassword -Server $vcda_server -OldPassword ($vm_credentials.old | ConvertFrom-SecureString -AsPlainText) `
-                -NewPassword ($vm_credentials.current | ConvertFrom-SecureString -AsPlainText)
-                if ($pass -eq "Root Password Changed Successfully."){
+                    -NewPassword ($vm_credentials.current | ConvertFrom-SecureString -AsPlainText)
+                if ($pass -eq "Root Password Changed Successfully.") {
                     Write-log -message "'$($VCDA_VM.name)' ($IP): root password changed successfully." -LogPrefix $LogPrefix
                 }
             }
@@ -133,6 +133,8 @@ function Initialize-VCDAAppliance {
         if ($role -eq 'cloud') {
             Write-Log -message "Apply License Key to 'cloud' service." -LogPrefix $LogPrefix
             Set-License -Server $vcda_server -LicenseKey $LicenseKey | Out-Null
+            Set-LookupService -Server $vcda_server -url $lookup_service.Uri.AbsoluteUri | Out-Null
+
             Write-Log -message "Set 'cloud' service Site name to '$siteName'." -LogPrefix $LogPrefix
             Set-VCDASiteName -Server $vcda_server -Name $SiteName | Out-Null
             Write-Log -message "Set 'cloud' service Public Endpoint address to '$PublicApiEndpoint'." -LogPrefix $LogPrefix
