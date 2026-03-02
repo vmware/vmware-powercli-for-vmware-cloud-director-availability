@@ -1,6 +1,6 @@
 <#
-Copyright (c) 2023-2025 Broadcom. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
+Copyright (c) CA, Inc. All rights reserved.
+SPDX-License-Identifier: LicenseRef-CA-Inc-Software-License
 #>
 function Set-LocalCertificate {
     [CmdletBinding()]

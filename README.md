@@ -1,7 +1,6 @@
 <!-- markdownlint-disable first-line-h1 no-inline-html -->
 <img src="Resources/vcda-icon.png" alt="VMmware Cloud Director Availability" width="150"></br></br>
 # Powershell repository for VMware Cloud Director Availability
-[<img src="https://img.shields.io/badge/License-BSD%202--Clause-orange.svg">][license]
 
 <img src="https://img.shields.io/badge/powershell-5391FE?style=for-the-badge&logo=powershell&logoColor=white">&nbsp;&nbsp;
 <img src="https://img.shields.io/badge/VMware-5391FE?style=for-the-badge&logo=VMware&logoColor=white">&nbsp;&nbsp;
@@ -24,8 +23,8 @@ as an open-source patch. For more detailed information, refer to [CONTRIBUTING.m
 
 ## License
 
-Copyright 2023 VMware, Inc.
-[SPDX-License-Identifier: BSD-2-Clause](LICENSE)
+Copyright (c) CA, Inc. All rights reserved.
+[SPDX-License-Identifier: LicenseRef-CA-Inc-Software-License](LICENSE)
 
 [//]: Links
 

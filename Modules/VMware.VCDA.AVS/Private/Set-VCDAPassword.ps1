@@ -1,6 +1,6 @@
 <#
-Copyright 2023 VMware, Inc.
-SPDX-License-Identifier: BSD-2-Clause
+Copyright (c) CA, Inc. All rights reserved.
+SPDX-License-Identifier: LicenseRef-CA-Inc-Software-License
 #>
 function Set-VCDAPassword {
     [CmdletBinding()]
