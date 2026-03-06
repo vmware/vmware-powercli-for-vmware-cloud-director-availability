@@ -103,7 +103,7 @@ function Deploy-VCDAOVA {
             Write-log -message "Deploying VM with name: '$Name'." -LogPrefix $LogPrefix
             Test-IPAddress -IPAddress $IPAddress
             $VM = Import-VApp -Source $script:ova_file -Name $Name -Datastore $Datastore -VMHost $vmhost -DiskStorageFormat Thin `
-                -OvfConfiguration $ovf_config -InventoryLocation $InventoryLocation
+                -OvfConfiguration $ovf_config -InventoryLocation $InventoryLocation -Force
         }
         if ($vm.PowerState -ne 'PoweredOn') {
             $spec = New-Object VMware.Vim.VirtualMachineConfigSpec

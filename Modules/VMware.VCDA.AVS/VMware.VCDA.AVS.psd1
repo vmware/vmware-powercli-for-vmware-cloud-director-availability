@@ -16,7 +16,7 @@ SPDX-License-Identifier: LicenseRef-CA-Inc-Software-License
     RootModule           = 'VMware.VCDA.AVS.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '1.0.4'
+    ModuleVersion        = '1.0.5'
 
     # Supported PSEditions
     CompatiblePSEditions = 'core'
